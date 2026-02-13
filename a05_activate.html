@@ -1,0 +1,263 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ギフトコード管理｜販売済み有効化</title>
+  <style>
+    :root{--bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--p:#2563eb;--p2:#1d4ed8;--shadow:0 10px 25px rgba(17,24,39,.08);--r:16px;
+      --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP","Meiryo",Arial,sans-serif;}
+    body{margin:0;font-family:var(--font);color:var(--text);background:linear-gradient(180deg,#fff 0%,var(--bg) 100%);}
+    .wrap{max-width:1180px;margin:34px auto;padding:0 18px 64px;}
+    .title{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+    h1{margin:0;font-size:22px}
+    .sub{color:var(--muted);font-size:13px;line-height:1.5}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
+    .section-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+    .section-h h2{margin:0;font-size:15px}
+    .badge{border:1px solid var(--line);background:#f9fafb;color:#374151;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;justify-content:space-between}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+    .field{display:flex;flex-direction:column;gap:6px;min-width:240px;flex:1}
+    label{font-size:12px;font-weight:900;color:#374151}
+    input,select{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font-size:14px;background:#fff;outline:none}
+    .btn{border:1px solid var(--line);background:#fff;color:#111827;padding:11px 14px;border-radius:12px;font-weight:900;cursor:pointer;white-space:nowrap}
+    .btn.primary{border-color:transparent;background:var(--p);color:#fff}
+    .btn.primary:hover{background:var(--p2)}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .divider{height:1px;background:var(--line);margin:12px 0 14px}
+    .pillbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .pill{border:1px solid var(--line);background:#f9fafb;padding:7px 10px;border-radius:999px;font-size:12px;color:#374151;white-space:nowrap}
+    .pill b{color:var(--text)}
+    .note{margin-top:12px;padding:12px 14px;border-radius:14px;background:#f9fafb;border:1px dashed var(--line);color:#374151;font-size:12px;line-height:1.7}
+    table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+    thead th{background:#f9fafb;border-bottom:1px solid var(--line);padding:10px 10px;text-align:left;font-size:12px;color:#374151;white-space:nowrap}
+    tbody td{border-bottom:1px solid var(--line);padding:10px 10px;font-size:13px;white-space:nowrap}
+    tbody tr:last-child td{border-bottom:none}
+    .status{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;font-weight:900;background:#fff;color:#374151}
+    .status.DRAFT{background:#f3f4f6}
+    .status.ACTIVE{background:rgba(22,163,74,.10);border-color:rgba(22,163,74,.25);color:#14532d}
+    .status.USED{background:rgba(37,99,235,.10);border-color:rgba(37,99,235,.25);color:#1e3a8a}
+    .status.EXPIRED{background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.25);color:#7f1d1d}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    .toast{position:fixed;right:18px;bottom:18px;width:min(440px,calc(100% - 36px));background:#111827;color:#fff;padding:12px 14px;border-radius:14px;box-shadow:0 10px 25px rgba(17,24,39,.25);display:none;font-size:13px;line-height:1.5;z-index:30}
+    .toast .sub{color:rgba(255,255,255,.75);font-size:12px;margin-top:4px}
+    @media (max-width: 980px){table{display:block;overflow-x:auto}.field{min-width:100%}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="title">
+    <div>
+      <h1>ギフトコード管理｜販売済み有効化</h1>
+      <div class="sub">販売店からの「販売済み報告」を受け取った後、この画面で対象ギフトカードを有効化します。</div>
+    </div>
+    <div class="badge">業務画面モック</div>
+  </div>
+
+  <div class="card">
+    <div class="section-h">
+      <h2>ロット</h2>
+      <span class="badge">ロット起点</span>
+    </div>
+
+    <div class="row">
+      <div class="controls" style="flex:1;">
+        <div class="field">
+          <label for="LotSelect">ロット番号</label>
+          <select id="LotSelect">
+            <option value="202604-01">202604-01（税込 11,800円コース / 12枚）</option>
+            <option value="202603-02">202603-02（税込 5,800円コース / 6枚）</option>
+          </select>
+        </div>
+        <button class="btn primary" type="button" onclick="loadLot()">ロットを表示</button>
+      </div>
+      <div class="controls">
+        <a class="btn" href="a05_issue.html">発行</a>
+        <a class="btn" href="a05_print.html">印刷用CSV</a>
+        <a class="btn" href="a05_inquiry.html">問い合わせ</a>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="pillbar">
+      <div class="pill">ロット：<b id="sumLot">—</b></div>
+      <div class="pill">コース：<b id="sumCourse">—</b></div>
+      <div class="pill">未有効：<b id="sumDraft">—</b></div>
+      <div class="pill">有効：<b id="sumActive">—</b></div>
+      <div class="pill">使用済：<b id="sumUsed">—</b></div>
+      <div class="pill">期限切れ：<b id="sumExpired">—</b></div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-h">
+      <h2>有効化（販売済み処理）</h2>
+      <span class="badge">未有効のみ対象</span>
+    </div>
+
+    <div class="row">
+      <div class="controls" style="flex:1;">
+        <div class="field" style="min-width:260px;">
+          <label for="SoldOn">販売日（販売店のExcelに合わせる）</label>
+          <input id="SoldOn" type="date" />
+        </div>
+      </div>
+
+      <div class="controls">
+        <button class="btn" type="button" onclick="selectAllDraft()">未有効を全選択</button>
+        <button class="btn" type="button" onclick="clearSelection()">選択解除</button>
+        <button class="btn primary" id="activateBtn" type="button" onclick="activateSelected()">選択分を有効化</button>
+      </div>
+    </div>
+
+    <div class="note">
+      <b>有効化処理の内容（未有効のみ）</b><br/>
+      状態を「有効」に変更／販売日を記録／有効化日時を記録／有効期限を「販売日＋365日」に設定
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-h">
+      <h2>このロットのギフトコード一覧</h2>
+      <span class="badge">シリアル番号順</span>
+    </div>
+
+    <table aria-label="ギフトコード一覧">
+      <thead>
+        <tr>
+          <th style="width:70px;">選択</th>
+          <th style="width:180px;">シリアル番号</th>
+          <th style="width:110px;">状態</th>
+          <th style="width:120px;">販売日</th>
+          <th style="width:120px;">有効期限</th>
+          <th>ギフトコード</th>
+        </tr>
+      </thead>
+      <tbody id="body"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  const lots={
+    "202604-01":{lot_no:"202604-01",course:"税込 11,800円コース",items:[
+      {serial_no:"202604-01-0001",code:"7KQZ-HM3R-X9TP-B4WC",status:"DRAFT",sold_on:"",expires_on:""},
+      {serial_no:"202604-01-0002",code:"N8YD-R2KF-Q7LM-3VZP",status:"DRAFT",sold_on:"",expires_on:""},
+      {serial_no:"202604-01-0003",code:"T6WB-XR9H-K4QP-8ZMF",status:"ACTIVE",sold_on:"2026-02-08",expires_on:"2027-02-08"},
+      {serial_no:"202604-01-0004",code:"Q2HV-9WZK-7M3R-B8XP",status:"USED",sold_on:"2026-02-01",expires_on:"2027-02-01"},
+      {serial_no:"202604-01-0005",code:"C7ZP-4HVM-N6RK-2QWD",status:"EXPIRED",sold_on:"2025-01-10",expires_on:"2026-01-10"},
+    ]},
+    "202603-02":{lot_no:"202603-02",course:"税込 5,800円コース",items:[
+      {serial_no:"202603-02-0001",code:"K4QP-8ZMF-7KQZ-HM3R",status:"DRAFT",sold_on:"",expires_on:""},
+      {serial_no:"202603-02-0002",code:"Z3VP-7K2R-W8ND-H5D9",status:"ACTIVE",sold_on:"2026-01-20",expires_on:"2027-01-20"},
+      {serial_no:"202603-02-0003",code:"2VQF-MP7C-R3KM-8WZH",status:"USED",sold_on:"2026-01-10",expires_on:"2027-01-10"},
+    ]}
+  };
+  let currentLot="202604-01";
+  let selected=new Set();
+  const el=(id)=>document.getElementById(id);
+
+  function toast(msg,sub){
+    const t=el("toast");
+    t.innerHTML=`<b>${msg}</b>`+(sub?`<div class="sub">${sub}</div>`:"");
+    t.style.display="block";
+    clearTimeout(window.__tt);
+    window.__tt=setTimeout(()=>t.style.display="none",3200);
+  }
+  function isoToJp(iso){return iso?iso.replaceAll("-","/"):"";}
+  function addDays(iso,days){
+    const d=new Date(iso+"T00:00:00"); d.setDate(d.getDate()+days);
+    const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), dd=String(d.getDate()).padStart(2,"0");
+    return `${y}-${m}-${dd}`;
+  }
+  function counts(items){
+    const c={DRAFT:0,ACTIVE:0,USED:0,EXPIRED:0};
+    items.forEach(i=>c[i.status]=(c[i.status]||0)+1);
+    return c;
+  }
+  function statusLabel(s){
+    return s==="DRAFT"?"未有効":s==="ACTIVE"?"有効":s==="USED"?"使用済":s==="EXPIRED"?"期限切れ":s;
+  }
+  function render(){
+    const lot=lots[currentLot];
+    const c=counts(lot.items);
+    el("sumLot").textContent=lot.lot_no;
+    el("sumCourse").textContent=lot.course;
+    el("sumDraft").textContent=String(c.DRAFT);
+    el("sumActive").textContent=String(c.ACTIVE);
+    el("sumUsed").textContent=String(c.USED);
+    el("sumExpired").textContent=String(c.EXPIRED);
+
+    const body=el("body");
+    body.innerHTML="";
+    lot.items.slice().sort((a,b)=>a.serial_no.localeCompare(b.serial_no)).forEach(i=>{
+      const can=i.status==="DRAFT";
+      const tr=document.createElement("tr");
+      tr.innerHTML=`
+        <td style="text-align:center;">
+          <input type="checkbox" ${can?"":"disabled"} ${selected.has(i.serial_no)?"checked":""}
+            onchange="onCheck('${i.serial_no}', this.checked)" />
+        </td>
+        <td class="mono">${i.serial_no}</td>
+        <td><span class="status ${i.status}">${statusLabel(i.status)}</span></td>
+        <td>${isoToJp(i.sold_on)}</td>
+        <td>${isoToJp(i.expires_on)}</td>
+        <td class="mono">${i.code}</td>
+      `;
+      body.appendChild(tr);
+    });
+    el("activateBtn").disabled = selected.size===0;
+  }
+  window.onCheck=(serial,checked)=>{
+    if(checked) selected.add(serial); else selected.delete(serial);
+    el("activateBtn").disabled = selected.size===0;
+  }
+  function loadLot(){
+    currentLot=el("LotSelect").value;
+    selected.clear();
+    render();
+    toast("ロットを表示しました",`ロット番号：${currentLot}`);
+  }
+  function selectAllDraft(){
+    const lot=lots[currentLot];
+    lot.items.forEach(i=>{ if(i.status==="DRAFT") selected.add(i.serial_no); });
+    render();
+    toast("未有効を全選択しました",`選択数：${selected.size}`);
+  }
+  function clearSelection(){
+    selected.clear();
+    render();
+    toast("選択を解除しました");
+  }
+  function activateSelected(){
+    const sold=el("SoldOn").value;
+    if(!sold){ toast("販売日を入力してください"); return; }
+
+    const lot=lots[currentLot];
+    let changed=0;
+    for(const serial of [...selected]){
+      const item=lot.items.find(i=>i.serial_no===serial);
+      if(!item || item.status!=="DRAFT") continue;
+      item.status="ACTIVE";
+      item.sold_on=sold;
+      item.activated_at=new Date().toISOString(); // 表示しない（モック）
+      item.expires_on=addDays(sold,365);
+      changed++;
+    }
+    selected.clear();
+    render();
+    toast("有効化しました（モック）",`更新件数：${changed} / 販売日：${sold.replaceAll("-","/")}`);
+  }
+
+  (function init(){
+    const now=new Date();
+    el("SoldOn").value=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+    render();
+  })();
+</script>
+</body>
+</html>

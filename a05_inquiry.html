@@ -1,0 +1,318 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ギフトコード管理｜問い合わせ</title>
+  <style>
+    :root{--bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--p:#2563eb;--p2:#1d4ed8;--danger:#dc2626;--danger2:#b91c1c;
+      --shadow:0 10px 25px rgba(17,24,39,.08);--r:16px;--font:ui-sans-serif,system-ui,-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP","Meiryo",Arial,sans-serif;}
+    body{margin:0;font-family:var(--font);color:var(--text);background:linear-gradient(180deg,#fff 0%,var(--bg) 100%);}
+    .wrap{max-width:1080px;margin:34px auto;padding:0 18px 64px;}
+    .title{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+    h1{margin:0;font-size:22px}
+    .sub{color:var(--muted);font-size:13px;line-height:1.5}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
+    .section-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+    .section-h h2{margin:0;font-size:15px}
+    .badge{border:1px solid var(--line);background:#f9fafb;color:#374151;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;justify-content:space-between}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+    .field{display:flex;flex-direction:column;gap:6px;min-width:260px;flex:1}
+    label{font-size:12px;font-weight:900;color:#374151}
+    input,select,textarea{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font-size:14px;background:#fff;outline:none}
+    textarea{min-height:72px;resize:vertical}
+    input:focus,select:focus,textarea:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.12)}
+    .btn{border:1px solid var(--line);background:#fff;color:#111827;padding:11px 14px;border-radius:12px;font-weight:900;cursor:pointer;white-space:nowrap;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+    .btn.primary{border-color:transparent;background:var(--p);color:#fff}
+    .btn.primary:hover{background:var(--p2)}
+    .btn.danger{border-color:transparent;background:var(--danger);color:#fff}
+    .btn.danger:hover{background:var(--danger2)}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .divider{height:1px;background:var(--line);margin:12px 0 14px}
+    .pillbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .pill{border:1px solid var(--line);background:#f9fafb;padding:7px 10px;border-radius:999px;font-size:12px;color:#374151;white-space:nowrap}
+    .pill b{color:var(--text)}
+    .note{margin-top:12px;padding:12px 14px;border-radius:14px;background:#f9fafb;border:1px dashed var(--line);color:#374151;font-size:12px;line-height:1.7}
+    .kv{display:grid;grid-template-columns:140px 1fr;gap:10px 12px}
+    .k{font-weight:900;color:#374151;font-size:13px}
+    .v{font-size:13px}
+    .status{display:inline-flex;align-items:center;padding:5px 10px;border-radius:999px;border:1px solid var(--line);font-size:12px;font-weight:900;background:#fff;color:#374151}
+    .status.DRAFT{background:#f3f4f6}
+    .status.ACTIVE{background:rgba(22,163,74,.10);border-color:rgba(22,163,74,.25);color:#14532d}
+    .status.USED{background:rgba(37,99,235,.10);border-color:rgba(37,99,235,.25);color:#1e3a8a}
+    .status.EXPIRED{background:rgba(220,38,38,.08);border-color:rgba(220,38,38,.25);color:#7f1d1d}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    .toast{position:fixed;right:18px;bottom:18px;width:min(440px,calc(100% - 36px));background:#111827;color:#fff;padding:12px 14px;border-radius:14px;box-shadow:0 10px 25px rgba(17,24,39,.25);display:none;font-size:13px;line-height:1.5;z-index:30}
+    .toast .sub{color:rgba(255,255,255,.75);font-size:12px;margin-top:4px}
+    @media (max-width: 860px){.field{min-width:100%}.kv{grid-template-columns:120px 1fr}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="title">
+    <div>
+      <h1>ギフトコード管理｜問い合わせ</h1>
+      <div class="sub">利用者からの問い合わせに対し、シリアル番号またはギフトコードで状態を確認します。使用済みの場合は「注文詳細（A-08）」で交換内容を確認します。</div>
+    </div>
+    <div class="badge">業務画面モック</div>
+  </div>
+
+  <div class="card">
+    <div class="section-h">
+      <h2>ロット（任意）</h2>
+      <span class="badge">検索が主導線</span>
+    </div>
+
+    <div class="row">
+      <div class="controls" style="flex:1;">
+        <div class="field">
+          <label for="LotSelect">ロット番号（絞り込みたい場合）</label>
+          <select id="LotSelect">
+            <option value="">（指定しない）</option>
+            <option value="202604-01">202604-01（税込 11,800円コース）</option>
+            <option value="202603-02">202603-02（税込 5,800円コース）</option>
+          </select>
+        </div>
+      </div>
+      <div class="controls">
+        <a class="btn" href="a05_issue.html">発行</a>
+        <a class="btn" href="a05_print.html">印刷用CSV</a>
+        <a class="btn" href="a05_activate.html">販売済み有効化</a>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-h">
+      <h2>検索</h2>
+      <span class="badge">シリアル番号 / ギフトコード</span>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="Search">検索キー</label>
+        <input id="Search" placeholder="例）202604-01-0002 または N8YD-R2KF-Q7LM-3VZP" />
+      </div>
+      <button class="btn primary" type="button" onclick="doSearch()">検索</button>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-h">
+      <h2>検索結果</h2>
+      <span class="badge">単票</span>
+    </div>
+
+    <div class="pillbar">
+      <div class="pill">ロット：<b id="resLot">—</b></div>
+      <div class="pill">シリアル番号：<b id="resSerial">—</b></div>
+      <div class="pill">コース：<b id="resCourse">—</b></div>
+    </div>
+
+    <div style="height:10px"></div>
+
+    <div class="kv">
+      <div class="k">状態</div><div class="v" id="resStatus">—</div>
+      <div class="k">販売日</div><div class="v" id="resSold">—</div>
+      <div class="k">有効期限</div><div class="v" id="resExp">—</div>
+      <div class="k">ギフトコード</div>
+      <div class="v">
+        <span class="mono" id="resCode">—</span>
+        <button class="btn" type="button" onclick="copyCode()" style="margin-left:8px;">コピー</button>
+      </div>
+
+      <div class="k">交換履歴</div>
+      <div class="v">
+        <!-- USED のときだけ表示 -->
+        <div id="orderSummary" style="display:none; margin-bottom:8px; color:var(--muted);">
+          注文番号：<span class="mono" id="resOrderNo">—</span> ／ 交換日時：<span id="resOrderedAt">—</span>
+        </div>
+
+        <a class="btn primary" id="openA08Btn" href="#" target="_blank" rel="noopener" style="display:none;">
+          注文詳細を開く（A-08）
+        </a>
+
+        <div id="noOrderHint" style="display:block; color:var(--muted);">
+          （使用済みの場合のみ、注文詳細へのリンクが表示されます）
+        </div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="section-h">
+      <h2>セッション破棄（条件付き）</h2>
+      <span class="badge">理由必須</span>
+    </div>
+
+    <div class="note" style="margin-top:0;">
+      実行できるのは、たとえば「有効」かつ「確定オーダーが存在しない」など、条件を満たす場合のみです。<br/>
+      実運用では、理由の記録（ログ）が必須です。
+    </div>
+
+    <div style="height:10px"></div>
+
+    <div class="field">
+      <label for="Reason">理由（必須）</label>
+      <textarea id="Reason" placeholder="例）利用者が途中離脱し、セッションが詰まっているためリセット"></textarea>
+    </div>
+
+    <div class="row" style="justify-content:flex-end; margin-top:10px;">
+      <button class="btn danger" id="discardBtn" type="button" onclick="discard()">セッションを破棄</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  /*
+    モック用データ
+    - USED の場合だけ order_id / order_no / ordered_at を持たせています
+    - A-08 へのリンク先は「a08_admin_order_detail.html?order_id=...」にしています（実装時に差し替え）
+  */
+  const db={
+    "202604-01":{course:"税込 11,800円コース",items:[
+      {serial_no:"202604-01-0001",code:"7KQZ-HM3R-X9TP-B4WC",status:"DRAFT",sold_on:"",expires_on:""},
+      {serial_no:"202604-01-0002",code:"N8YD-R2KF-Q7LM-3VZP",status:"ACTIVE",sold_on:"2026-02-08",expires_on:"2027-02-08"},
+      {serial_no:"202604-01-0003",code:"T6WB-XR9H-K4QP-8ZMF",status:"USED",sold_on:"2026-02-01",expires_on:"2027-02-01",
+        order_id:"ord_20260201_000123", order_no:"20260201-000123", ordered_at:"2026-02-11 14:32",
+        product_summary:"Aコース：商品A（例）"
+      },
+    ]},
+    "202603-02":{course:"税込 5,800円コース",items:[
+      {serial_no:"202603-02-0001",code:"K4QP-8ZMF-7KQZ-HM3R",status:"ACTIVE",sold_on:"2026-01-20",expires_on:"2027-01-20"},
+      {serial_no:"202603-02-0002",code:"Z3VP-7K2R-W8ND-H5D9",status:"EXPIRED",sold_on:"2024-12-01",expires_on:"2025-12-01"},
+    ]}
+  };
+
+  // 実装時に A-08 のURL形式に合わせて変更してください（Bubbleならページ名＋パラメータ）
+  function buildA08Url(order_id){
+    // 例）a08_admin_order_detail.html?order_id=...
+    return `a08_admin_order_detail.html?order_id=${encodeURIComponent(order_id)}`;
+    // 例）Bubbleなら：`/admin-order-detail?order_id=${...}` などに置換
+  }
+
+  let currentHit=null;
+  const el=(id)=>document.getElementById(id);
+  function toast(msg,sub){
+    const t=el("toast");
+    t.innerHTML=`<b>${msg}</b>`+(sub?`<div class="sub">${sub}</div>`:"");
+    t.style.display="block";
+    clearTimeout(window.__tt);
+    window.__tt=setTimeout(()=>t.style.display="none",3200);
+  }
+  function isoToJp(iso){return iso?iso.replaceAll("-","/"):"—";}
+  function statusLabel(s){return s==="DRAFT"?"未有効":s==="ACTIVE"?"有効":s==="USED"?"使用済":s==="EXPIRED"?"期限切れ":s;}
+  function statusChip(s){return `<span class="status ${s}">${statusLabel(s)}</span>`;}
+
+  function find(q, lotFilter){
+    const key=(q||"").trim().toUpperCase();
+    if(!key) return null;
+
+    const lots = lotFilter ? [lotFilter] : Object.keys(db);
+    for(const lotNo of lots){
+      const lot=db[lotNo]; if(!lot) continue;
+      const hit=lot.items.find(i=>i.serial_no.toUpperCase()===key || i.code.toUpperCase()===key);
+      if(hit) return {lotNo, course:lot.course, item:hit};
+    }
+    return null;
+  }
+
+  function setEmpty(){
+    currentHit=null;
+    el("resLot").textContent="—";
+    el("resSerial").textContent="—";
+    el("resCourse").textContent="—";
+    el("resStatus").innerHTML="—";
+    el("resSold").textContent="—";
+    el("resExp").textContent="—";
+    el("resCode").textContent="—";
+
+    // A-08リンク関連
+    el("orderSummary").style.display="none";
+    el("openA08Btn").style.display="none";
+    el("openA08Btn").href="#";
+    el("noOrderHint").style.display="block";
+    el("resOrderNo").textContent="—";
+    el("resOrderedAt").textContent="—";
+
+    // セッション破棄
+    el("discardBtn").disabled=true;
+  }
+
+  function doSearch(){
+    const q=el("Search").value;
+    const lotFilter=el("LotSelect").value || null;
+    const hit=find(q, lotFilter);
+
+    if(!hit){
+      setEmpty();
+      toast("見つかりませんでした", "シリアル番号 / ギフトコードを確認してください");
+      return;
+    }
+
+    currentHit=hit;
+    el("resLot").textContent=hit.lotNo;
+    el("resSerial").textContent=hit.item.serial_no;
+    el("resCourse").textContent=hit.course;
+    el("resStatus").innerHTML=statusChip(hit.item.status);
+    el("resSold").textContent=isoToJp(hit.item.sold_on);
+    el("resExp").textContent=isoToJp(hit.item.expires_on);
+    el("resCode").textContent=hit.item.code;
+
+    // USED のときだけ A-08 リンクを表示
+    if(hit.item.status==="USED" && hit.item.order_id){
+      el("noOrderHint").style.display="none";
+
+      el("orderSummary").style.display="block";
+      el("resOrderNo").textContent = hit.item.order_no || "—";
+      el("resOrderedAt").textContent = hit.item.ordered_at || "—";
+
+      const a08 = el("openA08Btn");
+      a08.href = buildA08Url(hit.item.order_id);
+      a08.style.display = "inline-flex";
+    }else{
+      el("orderSummary").style.display="none";
+      el("openA08Btn").style.display="none";
+      el("openA08Btn").href="#";
+      el("noOrderHint").style.display="block";
+    }
+
+    // 例：セッション破棄は「有効」だけ押せる（モック）
+    el("discardBtn").disabled = (hit.item.status!=="ACTIVE");
+
+    toast("検索結果を表示しました", `ロット番号：${hit.lotNo}`);
+  }
+
+  async function copyCode(){
+    if(!currentHit) return;
+    try{
+      await navigator.clipboard.writeText(currentHit.item.code);
+      toast("コピーしました", `ギフトコード：${currentHit.item.code}`);
+    }catch(e){
+      alert("コピーできませんでした（ブラウザ権限をご確認ください）");
+    }
+  }
+
+  function discard(){
+    if(!currentHit){ toast("対象が選択されていません"); return; }
+    if(currentHit.item.status!=="ACTIVE"){ toast("条件を満たさないため実行できません"); return; }
+    const reason=el("Reason").value.trim();
+    if(!reason){ toast("理由を入力してください（必須）"); return; }
+
+    alert(
+      "（モック）セッション破棄を実行しました。\n"+
+      `対象：${currentHit.item.serial_no}\n`+
+      `理由：${reason}\n`+
+      "※実運用ではログが記録されます"
+    );
+    el("Reason").value="";
+    toast("セッションを破棄しました（モック）", "ログ記録（想定）");
+  }
+
+  setEmpty();
+</script>
+</body>
+</html>
