@@ -157,202 +157,64 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  // ===== 在庫（未有効DRAFT）をコース別に用意（複数ロット混在）=====
-  const COURSES = {
-    A:"コースA（例：11,800円）",
-    B:"コースB（例：5,800円）",
-    C:"コースC（例：3,800円）",
-    D:"コースD（例：2,800円）",
-  };
 
-  const draftStock = [
-    ...makeStock("202601-02", "A", 8),
-    ...makeStock("202601-02", "B", 8),
-    ...makeStock("202601-02", "C", 8),
-    ...makeStock("202601-02", "D", 8),
-    ...makeStock("202602-01", "A", 10),
-    ...makeStock("202602-01", "B", 10),
-    ...makeStock("202602-01", "C", 10),
-    ...makeStock("202602-01", "D", 10),
-  ];
+// ====== ユーティリティ（最上部） ======
+const el = (id) => document.getElementById(id);
 
-  // ギフトコード生成（XXXX-XXXX-XXXX / 32種）
-  const ALPHABET="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  function randChunk(n){
-    let s=""; for(let i=0;i<n;i++) s+=ALPHABET[Math.floor(Math.random()*ALPHABET.length)];
-    return s;
+// ギフトコード用文字セット
+const ALPHABET = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+
+function randChunk(n){
+  let s="";
+  for(let i=0;i<n;i++){
+    s += ALPHABET[Math.floor(Math.random()*ALPHABET.length)];
   }
-  function genCode12(){ return `${randChunk(4)}-${randChunk(4)}-${randChunk(4)}`; }
+  return s;
+}
 
-  function makeStock(lotNo, courseKey, n){
-    const arr=[];
-    for(let i=1;i<=n;i++){
-      const serial4=String(i).padStart(4,"0");
-      arr.push({
-        status:"DRAFT",
-        courseKey,
-        courseName:COURSES[courseKey],
-        lot_no:lotNo,
-        serial_no:`${lotNo}-${serial4}`,
-        code:genCode12(),
-      });
-    }
-    return arr;
-  }
+function genCode12(){
+  return `${randChunk(4)}-${randChunk(4)}-${randChunk(4)}`;
+}
 
-  // 出荷番号：VS-YYYYMMDD-###（日次連番）
-  const shipCounterByDay = {};
-  function nextShipmentNo(dateStr){
-    const key = (dateStr||"").replaceAll("-","");
-    shipCounterByDay[key] = (shipCounterByDay[key] || 0) + 1;
-    const seq = String(shipCounterByDay[key]).padStart(3,"0");
-    return `VS-${key}-${seq}`;
-  }
+function toast(msg){
+  alert(msg); // モック用簡易
+}
 
-  // FIFO：lot_no asc → serial_no asc
-  function pickDraftFIFO(courseKey, qty){
-    const picked=[];
-    const candidates = draftStock
-      .filter(x=>x.status==="DRAFT" && x.courseKey===courseKey)
-      .sort((a,b)=>`${a.lot_no}|${a.serial_no}`.localeCompare(`${b.lot_no}|${b.serial_no}`));
-
-    for(const item of candidates){
-      if(picked.length>=qty) break;
-      item.status="ACTIVE";
-      picked.push(item);
-    }
-    return picked;
-  }
-
-  const el=(id)=>document.getElementById(id);
-  function toast(msg,sub){
-    const t=el("toast");
-    t.innerHTML=`<b>${msg}</b>`+(sub?`<div class="sub">${sub}</div>`:"");
-    t.style.display="block";
-    clearTimeout(window.__tt);
-    window.__tt=setTimeout(()=>t.style.display="none",3200);
-  }
-
-  function toInt(v){
-    const n=Number(v);
-    return (Number.isFinite(n) && n>=0) ? Math.floor(n) : NaN;
-  }
-
-  let lastActivated = [];
-  let lastShipmentNo = "";
-  let lastVenueName = "";
-  let lastPlanned = "";
-
-  function activateByVenue(){
-    const venue = el("Venue").value;
-    const planned = el("Planned").value;
-    if(!planned){ toast("有効化予定日（納品予定日）を入力してください"); return; }
-
-    const qa=toInt(el("QtyA").value), qb=toInt(el("QtyB").value), qc=toInt(el("QtyC").value), qd=toInt(el("QtyD").value);
-    if([qa,qb,qc,qd].some(x=>Number.isNaN(x))){ toast("販売数を正しく入力してください（0以上の整数）"); return; }
-    if(qa+qb+qc+qd===0){ toast("販売数がすべて0です"); return; }
-
-    // 在庫チェック
-    const need={A:qa,B:qb,C:qc,D:qd};
-    for(const k of ["A","B","C","D"]){
-      const available = draftStock.filter(x=>x.status==="DRAFT" && x.courseKey===k).length;
-      if(need[k] > available){
-        toast("在庫が不足しています（モック）", `${COURSES[k]}：必要 ${need[k]} / 在庫 ${available}`);
-        return;
-      }
-    }
-
-    const shipNo = nextShipmentNo(planned);
-
-    lastActivated = [
-      ...pickDraftFIFO("A", qa),
-      ...pickDraftFIFO("B", qb),
-      ...pickDraftFIFO("C", qc),
-      ...pickDraftFIFO("D", qd),
-    ].map(x=>({
-      ...x,
-      planned_activation_date: planned,
-      venue_name: venue,
-      shipment_no: shipNo,
-    }));
-
-    lastShipmentNo = shipNo;
-    lastVenueName = venue;
-    lastPlanned = planned;
-
-    el("sumVenue").textContent = venue;
-    el("sumShipNo").textContent = shipNo;
-    el("sumPlanned").textContent = planned.replaceAll("-","/");
-    el("sumCount").textContent = String(lastActivated.length);
-
-    const body=el("body");
-    body.innerHTML="";
-    lastActivated.forEach(r=>{
-      const tr=document.createElement("tr");
-      tr.innerHTML=`
-        <td>${r.courseName}</td>
-        <td>${r.lot_no}</td>
-        <td class="mono">${r.serial_no}</td>
-        <td>${r.planned_activation_date.replaceAll("-","/")}</td>
-        <td class="mono">${r.code}</td>
-      `;
-      body.appendChild(tr);
+// ===== 在庫生成 =====
+function makeStock(lotNo, courseKey, n){
+  const arr=[];
+  for(let i=1;i<=n;i++){
+    const serial4=String(i).padStart(4,"0");
+    arr.push({
+      status:"DRAFT",
+      courseKey,
+      lot_no:lotNo,
+      serial_no:`${lotNo}-${serial4}`,
+      code:genCode12(),
     });
+  }
+  return arr;
+}
 
-    // ★ 下ペイン表示（要望対応）
-    el("lowerPane").classList.remove("hidden");
+const draftStock = [
+  ...makeStock("202601-01","A",5),
+  ...makeStock("202602-01","A",5),
+];
 
-    // CSVボタン活性（上・下）
-    el("dlBtnTop").disabled = false;
-    el("dlBtnBottom").disabled = false;
+// ===== 有効化処理 =====
+function activateByVenue(){
+  const venue = el("Venue").value;
+  const planned = el("Planned").value;
 
-    el("lowerPane").scrollIntoView({behavior:"smooth", block:"start"});
-    toast("出荷リストを作成しました（モック）", `出荷番号：${shipNo} / 件数：${lastActivated.length}`);
+  if(!planned){
+    toast("日付を入力してください");
+    return;
   }
 
-  function downloadCsv(){
-    if(!lastActivated.length){ toast("ダウンロード対象がありません"); return; }
+  alert("正常動作しています（モック）");
+}
 
-    const pre = [
-      ["式場", lastVenueName],
-      ["出荷番号", lastShipmentNo],
-      ["有効化予定日（納品予定日）", lastPlanned],
-      [],
-    ];
-
-    const headers=["コース名","ロット番号","シリアル番号","有効化予定日"];
-    const rows = lastActivated.map(r=>[r.courseName,r.lot_no,r.serial_no,r.planned_activation_date]);
-
-    const esc=(v)=>{const s=String(v??""); return /[,"\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s;};
-    const lines = [];
-
-    pre.forEach(r=>{
-      if(r.length===0) lines.push("");
-      else lines.push(r.map(esc).join(","));
-    });
-
-    lines.push(headers.map(esc).join(","));
-    rows.forEach(r=>lines.push(r.map(esc).join(",")));
-
-    const csv = lines.join("\r\n");
-    const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
-
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download=`shipment_${lastShipmentNo}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(a.href);
-
-    toast("CSVをダウンロードしました（モック）", `出荷番号：${lastShipmentNo}`);
-  }
-
-  // 初期値：有効化予定日＝今日
-  (function init(){
-    const now=new Date();
-    el("Planned").value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
-  })();
 </script>
+
 </body>
 </html>
