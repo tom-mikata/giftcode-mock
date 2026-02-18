@@ -1,0 +1,214 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ギフトコード管理｜発行＋印刷</title>
+  <style>
+    :root{--bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--p:#2563eb;--p2:#1d4ed8;--shadow:0 10px 25px rgba(17,24,39,.08);--r:16px;
+      --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP","Meiryo",Arial,sans-serif;}
+    body{margin:0;font-family:var(--font);color:var(--text);background:linear-gradient(180deg,#fff 0%,var(--bg) 100%);}
+    .wrap{max-width:1100px;margin:34px auto;padding:0 18px 64px;}
+    .title{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
+    h1{margin:0;font-size:22px}
+    .sub{color:var(--muted);font-size:13px;line-height:1.6}
+    .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
+    .section-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
+    .section-h h2{margin:0;font-size:15px}
+    .badge{border:1px solid var(--line);background:#f9fafb;color:#374151;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap}
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;justify-content:space-between}
+    .controls{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+    .field{display:flex;flex-direction:column;gap:6px;min-width:260px;flex:1}
+    label{font-size:12px;font-weight:900;color:#374151}
+    input,select,textarea{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font-size:14px;background:#fff;outline:none}
+    textarea{min-height:72px;resize:vertical}
+    input:focus,select:focus,textarea:focus{border-color:#93c5fd;box-shadow:0 0 0 4px rgba(59,130,246,.12)}
+    .btn{border:1px solid var(--line);background:#fff;color:#111827;padding:11px 14px;border-radius:12px;font-weight:900;cursor:pointer;white-space:nowrap}
+    .btn.primary{border-color:transparent;background:var(--p);color:#fff}
+    .btn.primary:hover{background:var(--p2)}
+    .btn:disabled{opacity:.45;cursor:not-allowed}
+    .divider{height:1px;background:var(--line);margin:12px 0 14px}
+    .pillbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .pill{border:1px solid var(--line);background:#f9fafb;padding:7px 10px;border-radius:999px;font-size:12px;color:#374151;white-space:nowrap}
+    .pill b{color:var(--text)}
+    .note{margin-top:12px;padding:12px 14px;border-radius:14px;background:#f9fafb;border:1px dashed var(--line);color:#374151;font-size:12px;line-height:1.7}
+    table{width:100%;border-collapse:separate;border-spacing:0;border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+    thead th{background:#f9fafb;border-bottom:1px solid var(--line);padding:10px 10px;text-align:left;font-size:12px;color:#374151;white-space:nowrap}
+    tbody td{border-bottom:1px solid var(--line);padding:10px 10px;font-size:13px;white-space:nowrap}
+    tbody tr:last-child td{border-bottom:none}
+    .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
+    .toast{position:fixed;right:18px;bottom:18px;width:min(440px,calc(100% - 36px));background:#111827;color:#fff;padding:12px 14px;border-radius:14px;box-shadow:0 10px 25px rgba(17,24,39,.25);display:none;font-size:13px;line-height:1.5;z-index:30}
+    .toast .sub{color:rgba(255,255,255,.75);font-size:12px;margin-top:4px}
+    @media (max-width: 860px){table{display:block;overflow-x:auto}.field{min-width:100%}}
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <div class="title">
+    <div>
+      <h1>ギフトコード管理｜発行＋印刷</h1>
+      <div class="sub">
+        ギフトカードを<strong>事前に一定量印刷</strong>するため、発行と印刷用データ生成をまとめて行います。<br/>
+        1クリックで「発行 → 印刷用CSV生成」まで実行し、発行済みコードをダウンロードできます。
+      </div>
+    </div>
+    <div class="badge">業務設計確認用モック</div>
+  </div>
+
+  <div class="card">
+    <div class="section-h">
+      <h2>発行（印刷用データ生成まで一括）</h2>
+      <span class="badge">1クリック</span>
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label for="Course">コース</label>
+        <select id="Course">
+          <option>コースA（例：11,800円）</option>
+          <option>コースB（例：5,800円）</option>
+          <option>コースC（例：3,800円）</option>
+          <option>コースD（例：2,800円）</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="Qty">発行数</label>
+        <input id="Qty" value="100" inputmode="numeric" />
+      </div>
+    </div>
+
+    <div style="height:10px"></div>
+
+    <div class="field">
+      <label for="Memo">印刷メモ（任意）</label>
+      <textarea id="Memo" placeholder="例）初回印刷、台紙A、4コース共通デザイン"></textarea>
+    </div>
+
+    <div class="row" style="justify-content:flex-end; margin-top:10px;">
+      <button class="btn primary" type="button" onclick="issueAndPrepare()">発行して印刷用CSVを作成</button>
+      <button class="btn" id="dlBtn" type="button" onclick="downloadCsv()" disabled>発行済みギフトコードをダウンロード（CSV）</button>
+    </div>
+
+    <div class="note">
+      <b>印刷会社に渡すCSV列（固定）</b><br/>
+      ロット番号 / シリアル番号 / ギフトコード / コース名
+      <br/><br/>
+      ギフトコード形式：<span class="mono">XXXX-XXXX-XXXX</span>（12桁）
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="pillbar">
+      <div class="pill">今回のロット：<b id="sumLot">—</b></div>
+      <div class="pill">コース：<b id="sumCourse">—</b></div>
+      <div class="pill">発行数：<b id="sumIssued">—</b></div>
+    </div>
+
+    <div style="height:10px"></div>
+
+    <table aria-label="発行済みギフトコード（表示例）">
+      <thead>
+        <tr>
+          <th>ロット番号</th>
+          <th>シリアル番号</th>
+          <th>ギフトコード</th>
+          <th>コース名</th>
+        </tr>
+      </thead>
+      <tbody id="body"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+  // ===== モック用：ギフトコード生成（XXXX-XXXX-XXXX / 32種）=====
+  const ALPHABET="ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+  const el=(id)=>document.getElementById(id);
+
+  function toast(msg,sub){
+    const t=el("toast");
+    t.innerHTML=`<b>${msg}</b>`+(sub?`<div class="sub">${sub}</div>`:"");
+    t.style.display="block";
+    clearTimeout(window.__tt);
+    window.__tt=setTimeout(()=>t.style.display="none",3200);
+  }
+
+  function randChunk(n){
+    let s=""; for(let i=0;i<n;i++) s+=ALPHABET[Math.floor(Math.random()*ALPHABET.length)];
+    return s;
+  }
+  function genCode12(){ return `${randChunk(4)}-${randChunk(4)}-${randChunk(4)}`; }
+
+  // ロット番号採番（例：YYYYMM-01, YYYYMM-02...）
+  const lotCounterByYm = {};
+  function nextLotNo(){
+    const now=new Date();
+    const ym = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,"0")}`;
+    lotCounterByYm[ym] = (lotCounterByYm[ym] || 0) + 1;
+    const seq = String(lotCounterByYm[ym]).padStart(2,"0");
+    return `${ym}-${seq}`;
+  }
+
+  let lastRows = []; // 直近発行分（CSVダウンロード対象）
+
+  function issueAndPrepare(){
+    const course = el("Course").value;
+    const qty = Number(el("Qty").value);
+    if(!Number.isFinite(qty) || qty<=0){ toast("発行数を正しく入力してください"); return; }
+
+    const lotNo = nextLotNo();
+    lastRows = [];
+
+    for(let i=1;i<=qty;i++){
+      const serial4 = String(i).padStart(4,"0");
+      const serialNo = `${lotNo}-${serial4}`;
+      const code = genCode12();
+      lastRows.push({lot_no:lotNo, serial_no:serialNo, code, course});
+    }
+
+    // 画面表示
+    el("sumLot").textContent = lotNo;
+    el("sumCourse").textContent = course;
+    el("sumIssued").textContent = String(qty);
+
+    const body = el("body");
+    body.innerHTML="";
+    lastRows.slice(0,200).forEach(r=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML = `
+        <td>${r.lot_no}</td>
+        <td class="mono">${r.serial_no}</td>
+        <td class="mono">${r.code}</td>
+        <td>${r.course}</td>
+      `;
+      body.appendChild(tr);
+    });
+
+    el("dlBtn").disabled = false;
+    toast("発行～印刷用CSV生成まで完了（モック）", `ロット番号：${lotNo} / 発行数：${qty}`);
+  }
+
+  function downloadCsv(){
+    if(!lastRows.length){ toast("ダウンロード対象がありません"); return; }
+    const headers=["ロット番号","シリアル番号","ギフトコード","コース名"];
+    const rows = lastRows.map(r=>[r.lot_no,r.serial_no,r.code,r.course]);
+
+    const esc=(v)=>{const s=String(v??""); return /[,"\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s;};
+    const csv=[headers.map(esc).join(","), ...rows.map(r=>r.map(esc).join(","))].join("\r\n");
+    const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=`print_${lastRows[0].lot_no}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+
+    toast("CSVをダウンロードしました（モック）", `ロット番号：${lastRows[0].lot_no}`);
+  }
+</script>
+</body>
+</html>
