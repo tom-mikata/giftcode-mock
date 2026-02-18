@@ -35,12 +35,18 @@
     .count b{color:var(--text)}
     .toast{position:fixed;right:18px;bottom:18px;width:min(460px,calc(100% - 36px));background:#111827;color:#fff;padding:12px 14px;border-radius:14px;box-shadow:0 10px 25px rgba(17,24,39,.25);display:none;font-size:13px;line-height:1.5;z-index:30}
     .toast .sub{color:rgba(255,255,255,.75);font-size:12px;margin-top:4px}
+
     /* modal */
     .modal-bg{position:fixed;inset:0;background:rgba(17,24,39,.45);display:none;align-items:center;justify-content:center;padding:18px;z-index:40}
     .modal{width:min(980px,100%);background:#fff;border-radius:18px;border:1px solid var(--line);box-shadow:0 20px 50px rgba(0,0,0,.25);overflow:hidden}
     .modal-h{display:flex;justify-content:space-between;align-items:center;padding:14px 16px;background:#f9fafb;border-bottom:1px solid var(--line);gap:10px;flex-wrap:wrap}
     .modal-h b{font-size:14px}
     .modal-b{padding:14px 16px}
+
+    /* ▼ 上ペイン／下ペイン */
+    .pane-stack{display:flex;flex-direction:column;gap:14px}
+    .hidden{display:none!important}
+
     @media (max-width: 980px){table{display:block;overflow-x:auto}.field{min-width:100%}}
   </style>
 </head>
@@ -50,66 +56,82 @@
     <div>
       <h1>ギフトコード管理｜式場出荷（一覧／履歴）</h1>
       <div class="sub">
-        式場への出荷単位（出荷番号）で、いつ・どの式場へ・何枚を有効化し、どのギフトコードを渡したかを確認します。<br/>
+        出荷番号単位で、いつ・どの式場へ・何枚を有効化し、どのギフトコードを渡したかを確認します。<br/>
         取消は行わず、追加が発生した場合は別の出荷番号として記録されます。
       </div>
     </div>
     <div class="badge">業務設計確認用モック</div>
   </div>
 
-  <div class="card">
-    <div class="section-h">
-      <h2>検索</h2>
-      <span class="badge">式場 / 納品予定日</span>
-    </div>
+  <div class="pane-stack">
 
-    <div class="row">
-      <div class="field">
-        <label for="fVenue">式場</label>
-        <select id="fVenue">
-          <option value="">（すべて）</option>
-          <option>○○ブライダル（本店）</option>
-          <option>△△ホテル（婚礼）</option>
-          <option>□□ゲストハウス</option>
-        </select>
+    <!-- 上ペイン：検索 -->
+    <div class="card">
+      <div class="section-h">
+        <h2>検索</h2>
+        <span class="badge">式場 / 納品予定日</span>
       </div>
-      <div class="field">
-        <label for="fFrom">納品予定日（開始）</label>
-        <input id="fFrom" type="date" />
+
+      <div class="row">
+        <div class="field">
+          <label for="fVenue">式場</label>
+          <select id="fVenue">
+            <option value="">（すべて）</option>
+            <option>○○ブライダル（本店）</option>
+            <option>△△ホテル（婚礼）</option>
+            <option>□□ゲストハウス</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="fFrom">納品予定日（開始）</label>
+          <input id="fFrom" type="date" />
+        </div>
+        <div class="field">
+          <label for="fTo">納品予定日（終了）</label>
+          <input id="fTo" type="date" />
+        </div>
+        <button class="btn primary" type="button" onclick="applyFilter()">検索</button>
       </div>
-      <div class="field">
-        <label for="fTo">納品予定日（終了）</label>
-        <input id="fTo" type="date" />
+
+      <div class="divider"></div>
+
+      <div class="muted" style="font-size:12px;line-height:1.7">
+        ※ 検索ボタンを押すと、下に出荷一覧を表示します（初期表示は非表示）。
       </div>
-      <button class="btn primary" type="button" onclick="applyFilter()">検索</button>
     </div>
 
-    <div class="divider"></div>
+    <!-- 下ペイン：検索結果（検索後に表示） -->
+    <div class="card hidden" id="lowerPane">
+      <div class="section-h">
+        <h2>出荷一覧（検索結果）</h2>
+        <span class="badge">1行＝1出荷番号</span>
+      </div>
 
-    <div class="section-h">
-      <h2>出荷一覧</h2>
-      <span class="badge">1行＝1出荷番号</span>
+      <div class="muted" style="font-size:12px;margin-bottom:10px">
+        件数：<b id="resultCount">—</b>
+      </div>
+
+      <table aria-label="式場出荷一覧">
+        <thead>
+          <tr>
+            <th>出荷番号</th>
+            <th>式場</th>
+            <th>納品予定日</th>
+            <th>枚数（コース別）</th>
+            <th>作成日時</th>
+            <th>操作</th>
+          </tr>
+        </thead>
+        <tbody id="tbody"></tbody>
+      </table>
+
+      <div class="divider"></div>
+
+      <div class="muted" style="font-size:12px;line-height:1.7">
+        ※「CSV再ダウンロード」は、先頭行に「式場」「出荷番号」「納品予定日」を付加した形式で出力します。
+      </div>
     </div>
 
-    <table aria-label="式場出荷一覧">
-      <thead>
-        <tr>
-          <th>出荷番号</th>
-          <th>式場</th>
-          <th>納品予定日</th>
-          <th>枚数（コース別）</th>
-          <th>作成日時</th>
-          <th>操作</th>
-        </tr>
-      </thead>
-      <tbody id="tbody"></tbody>
-    </table>
-
-    <div class="divider"></div>
-
-    <div class="muted" style="font-size:12px;line-height:1.7">
-      ※「CSV再ダウンロード」は、同梱書類として編集する前提の体裁（先頭行に式場/出荷番号/納品予定日）で出力されます。
-    </div>
   </div>
 </div>
 
@@ -147,8 +169,10 @@
 
 <script>
   const el=(id)=>document.getElementById(id);
+
   function toast(msg,sub){
     const t=el("toast");
+    if(!t){ alert(sub ? `${msg}\n${sub}` : msg); return; }
     t.innerHTML=`<b>${msg}</b>`+(sub?`<div class="sub">${sub}</div>`:"");
     t.style.display="block";
     clearTimeout(window.__tt);
@@ -156,13 +180,6 @@
   }
 
   // ===== サンプル（履歴データ）=====
-  const SHIPMENTS = [
-    mkShipment("VS-20260220-001","○○ブライダル（本店）","2026-02-20",{A:2,B:1,C:0,D:0},"2026-02-16 10:12"),
-    mkShipment("VS-20260220-002","○○ブライダル（本店）","2026-02-20",{A:0,B:0,C:3,D:0},"2026-02-17 09:03"), // 追加
-    mkShipment("VS-20260228-001","△△ホテル（婚礼）","2026-02-28",{A:1,B:0,C:0,D:2},"2026-02-18 16:44"),
-    mkShipment("VS-20260305-001","□□ゲストハウス","2026-03-05",{A:0,B:2,C:0,D:1},"2026-02-19 11:20"),
-  ];
-
   const COURSES = {
     A:"コースA（例：11,800円）",
     B:"コースB（例：5,800円）",
@@ -178,10 +195,10 @@
   function genCode12(){ return `${randChunk(4)}-${randChunk(4)}-${randChunk(4)}`; }
 
   function mkShipment(id, venue, planned, qty, created_at){
-    // 明細もサンプル生成（FIFOなどの厳密性はここでは省略）
     const details=[];
     const lots=["202601-02","202602-01"];
     let serialSeq=1;
+
     for(const k of ["A","B","C","D"]){
       for(let i=0;i<(qty[k]||0);i++){
         const lot = lots[(serialSeq+i)%lots.length];
@@ -199,6 +216,13 @@
     return { id, shipment_no:id, venue_name:venue, planned_activation_date:planned, qty, created_at, details };
   }
 
+  const SHIPMENTS = [
+    mkShipment("VS-20260220-001","○○ブライダル（本店）","2026-02-20",{A:2,B:1,C:0,D:0},"2026-02-16 10:12"),
+    mkShipment("VS-20260220-002","○○ブライダル（本店）","2026-02-20",{A:0,B:0,C:3,D:0},"2026-02-17 09:03"), // 追加
+    mkShipment("VS-20260228-001","△△ホテル（婚礼）","2026-02-28",{A:1,B:0,C:0,D:2},"2026-02-18 16:44"),
+    mkShipment("VS-20260305-001","□□ゲストハウス","2026-03-05",{A:0,B:2,C:0,D:1},"2026-02-19 11:20"),
+  ];
+
   function within(dateStr, fromStr, toStr){
     if(!dateStr) return false;
     if(fromStr && dateStr < fromStr) return false;
@@ -209,6 +233,7 @@
   function render(list){
     const tb=el("tbody");
     tb.innerHTML="";
+
     list.forEach(s=>{
       const qty = s.qty || {};
       const pills = [
@@ -232,8 +257,11 @@
       `;
       tb.appendChild(tr);
     });
+
+    el("resultCount").textContent = String(list.length);
   }
 
+  // ★ 変更点：検索ボタン押下後に下ペイン表示＋描画
   function applyFilter(){
     const v=el("fVenue").value;
     const from=el("fFrom").value;
@@ -241,11 +269,18 @@
 
     const list = SHIPMENTS.filter(s=>{
       if(v && s.venue_name!==v) return false;
-      if(!within(s.planned_activation_date, from, to)) return false;
+      if(from || to){
+        if(!within(s.planned_activation_date, from, to)) return false;
+      }
       return true;
     });
 
     render(list);
+
+    // 下ペインを表示
+    el("lowerPane").classList.remove("hidden");
+    el("lowerPane").scrollIntoView({behavior:"smooth", block:"start"});
+
     toast("検索結果を表示しました", `件数：${list.length}`);
   }
 
@@ -309,16 +344,15 @@
     el("mbg").style.display="flex";
   }
   function hideModal(){ el("mbg").style.display="none"; }
-  function closeModal(e){ hideModal(); }
+  function closeModal(){ hideModal(); }
 
-  // 初期表示：直近30日っぽい範囲を入れて一覧表示
+  // 初期値（検索条件だけ入れておく）：下ペインは出さない
   (function init(){
     const today=new Date();
     const pad=(n)=>String(n).padStart(2,"0");
     const y=today.getFullYear(), m=today.getMonth()+1, d=today.getDate();
     el("fFrom").value = `${y}-${pad(m)}-${pad(Math.max(1,d-30))}`;
     el("fTo").value = `${y}-${pad(m)}-${pad(d)}`;
-    render(SHIPMENTS);
   })();
 </script>
 </body>
