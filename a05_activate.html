@@ -5,19 +5,22 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>ギフトコード管理｜式場別 有効化</title>
   <style>
-    :root{--bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--p:#2563eb;--p2:#1d4ed8;--shadow:0 10px 25px rgba(17,24,39,.08);--r:16px;
-      --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP","Meiryo",Arial,sans-serif;}
+    :root{
+      --bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;
+      --p:#2563eb;--p2:#1d4ed8;--shadow:0 10px 25px rgba(17,24,39,.08);--r:16px;
+      --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP","Meiryo",Arial,sans-serif;
+    }
     body{margin:0;font-family:var(--font);color:var(--text);background:linear-gradient(180deg,#fff 0%,var(--bg) 100%);}
     .wrap{max-width:1200px;margin:34px auto;padding:0 18px 64px;}
     .title{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:12px;}
     h1{margin:0;font-size:22px}
     .sub{color:var(--muted);font-size:13px;line-height:1.6}
+    .badge{border:1px solid var(--line);background:#f9fafb;color:#374151;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap}
     .card{background:var(--card);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:16px}
     .section-h{display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px}
     .section-h h2{margin:0;font-size:15px}
-    .badge{border:1px solid var(--line);background:#f9fafb;color:#374151;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:800;white-space:nowrap}
-    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .row{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end;justify-content:space-between}
+    .grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
     .field{display:flex;flex-direction:column;gap:6px;min-width:260px;flex:1}
     label{font-size:12px;font-weight:900;color:#374151}
     input,select{width:100%;box-sizing:border-box;padding:11px 12px;border:1px solid var(--line);border-radius:12px;font-size:14px;background:#fff;outline:none}
@@ -38,7 +41,16 @@
     .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
     .toast{position:fixed;right:18px;bottom:18px;width:min(460px,calc(100% - 36px));background:#111827;color:#fff;padding:12px 14px;border-radius:14px;box-shadow:0 10px 25px rgba(17,24,39,.25);display:none;font-size:13px;line-height:1.5;z-index:30}
     .toast .sub{color:rgba(255,255,255,.75);font-size:12px;margin-top:4px}
-    @media (max-width: 980px){.grid{grid-template-columns:1fr}table{display:block;overflow-x:auto}.field{min-width:100%}}
+
+    /* ▼ ここが「上ペイン／下ペイン」の見た目（カード2段） */
+    .pane-stack{display:flex;flex-direction:column;gap:14px}
+    .hidden{display:none!important}
+
+    @media (max-width: 980px){
+      .grid{grid-template-columns:1fr}
+      table{display:block;overflow-x:auto}
+      .field{min-width:100%}
+    }
   </style>
 </head>
 <body>
@@ -47,93 +59,103 @@
     <div>
       <h1>ギフトコード管理｜式場別 有効化</h1>
       <div class="sub">
-        式場から「コース別の販売数」と「有効化予定日（納品予定日）」の連絡を受けた後、必要枚数のギフトコードを<strong>未有効（DRAFT）在庫から自動選定（先入れ先出し）</strong>して有効化します。<br/>
-        取消は行わず、追加が発生した場合は「新しい出荷番号」で追加分を作成します。
+        式場から「コース別の販売数」と「有効化予定日（納品予定日）」の連絡を受けた後、未有効（DRAFT）在庫から<strong>先入れ先出し（古いロット優先）</strong>で自動選定して有効化します。<br/>
+        取消は行わず、追加が発生した場合は別の出荷番号として作成します。
       </div>
     </div>
     <div class="badge">業務設計確認用モック</div>
   </div>
 
-  <div class="card">
-    <div class="section-h">
-      <h2>式場からの販売連絡</h2>
-      <span class="badge">式場＋納品予定日＋4コース枚数</span>
-    </div>
+  <div class="pane-stack">
 
-    <div class="row">
-      <div class="field">
-        <label for="Venue">式場</label>
-        <select id="Venue">
-          <option>○○ブライダル（本店）</option>
-          <option>△△ホテル（婚礼）</option>
-          <option>□□ゲストハウス</option>
-        </select>
+    <!-- 上ペイン：入力・実行 -->
+    <div class="card">
+      <div class="section-h">
+        <h2>式場からの販売連絡</h2>
+        <span class="badge">式場＋納品予定日＋4コース枚数</span>
       </div>
-      <div class="field">
-        <label for="Planned">有効化予定日（納品予定日）</label>
-        <input id="Planned" type="date" />
+
+      <div class="row">
+        <div class="field">
+          <label for="Venue">式場</label>
+          <select id="Venue">
+            <option>○○ブライダル（本店）</option>
+            <option>△△ホテル（婚礼）</option>
+            <option>□□ゲストハウス</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="Planned">有効化予定日（納品予定日）</label>
+          <input id="Planned" type="date" />
+        </div>
+      </div>
+
+      <div style="height:10px"></div>
+
+      <div class="grid">
+        <div class="field">
+          <label for="QtyA">コースA 販売数</label>
+          <input id="QtyA" value="2" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <label for="QtyB">コースB 販売数</label>
+          <input id="QtyB" value="1" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <label for="QtyC">コースC 販売数</label>
+          <input id="QtyC" value="0" inputmode="numeric" />
+        </div>
+        <div class="field">
+          <label for="QtyD">コースD 販売数</label>
+          <input id="QtyD" value="0" inputmode="numeric" />
+        </div>
+      </div>
+
+      <div class="row" style="justify-content:flex-end;margin-top:10px;">
+        <button class="btn primary" type="button" onclick="activateByVenue()">有効化して出荷リストを作成</button>
+        <button class="btn" id="dlBtnTop" type="button" onclick="downloadCsv()" disabled>データダウンロード（CSV）</button>
+      </div>
+
+      <div class="note">
+        <b>CSV（同梱書類への編集を想定）</b><br/>
+        先頭行に「式場」「出荷番号」「有効化予定日」を付加し、その下に明細（繰り返し行）を出力します。
       </div>
     </div>
 
-    <div style="height:10px"></div>
-
-    <div class="grid">
-      <div class="field">
-        <label for="QtyA">コースA 販売数</label>
-        <input id="QtyA" value="2" inputmode="numeric" />
+    <!-- 下ペイン：結果表示（ボタン押下後に表示） -->
+    <div class="card hidden" id="lowerPane">
+      <div class="section-h">
+        <h2>今回 有効化したギフトコード一覧（出荷リスト）</h2>
+        <span class="badge">自動選定結果</span>
       </div>
-      <div class="field">
-        <label for="QtyB">コースB 販売数</label>
-        <input id="QtyB" value="1" inputmode="numeric" />
+
+      <div class="pillbar">
+        <div class="pill">式場：<b id="sumVenue">—</b></div>
+        <div class="pill">出荷番号：<b id="sumShipNo">—</b></div>
+        <div class="pill">有効化予定日：<b id="sumPlanned">—</b></div>
+        <div class="pill">件数：<b id="sumCount">—</b></div>
       </div>
-      <div class="field">
-        <label for="QtyC">コースC 販売数</label>
-        <input id="QtyC" value="0" inputmode="numeric" />
+
+      <div class="row" style="justify-content:flex-end;margin-top:10px;">
+        <button class="btn" id="dlBtnBottom" type="button" onclick="downloadCsv()" disabled>データダウンロード（CSV）</button>
       </div>
-      <div class="field">
-        <label for="QtyD">コースD 販売数</label>
-        <input id="QtyD" value="0" inputmode="numeric" />
-      </div>
+
+      <div style="height:10px"></div>
+
+      <table aria-label="出荷リスト">
+        <thead>
+          <tr>
+            <th>コース名</th>
+            <th>ロット番号</th>
+            <th>シリアル番号</th>
+            <th>有効化予定日</th>
+            <th>ギフトコード（参考表示）</th>
+          </tr>
+        </thead>
+        <tbody id="body"></tbody>
+      </table>
     </div>
 
-    <div class="row" style="justify-content:flex-end;margin-top:10px;">
-      <button class="btn primary" type="button" onclick="activateByVenue()">有効化して出荷リストを作成</button>
-      <button class="btn" id="dlBtn" type="button" onclick="downloadCsv()" disabled>データダウンロード（CSV）</button>
-    </div>
-
-    <div class="note">
-      <b>CSV（同梱書類への編集を想定）</b><br/>
-      先頭行に「式場」「出荷番号」「有効化予定日」を付加し、その下に明細（繰り返し行）を出力します。
-    </div>
-
-    <div class="divider"></div>
-
-    <div class="pillbar">
-      <div class="pill">式場：<b id="sumVenue">—</b></div>
-      <div class="pill">出荷番号：<b id="sumShipNo">—</b></div>
-      <div class="pill">有効化予定日：<b id="sumPlanned">—</b></div>
-      <div class="pill">作成件数：<b id="sumCount">—</b></div>
-    </div>
-
-    <div style="height:10px"></div>
-
-    <div class="section-h">
-      <h2>今回 有効化したギフトコード一覧（出荷リスト）</h2>
-      <span class="badge">先入れ先出し</span>
-    </div>
-
-    <table aria-label="出荷リスト">
-      <thead>
-        <tr>
-          <th>コース名</th>
-          <th>ロット番号</th>
-          <th>シリアル番号</th>
-          <th>有効化予定日</th>
-          <th>ギフトコード（参考表示）</th>
-        </tr>
-      </thead>
-      <tbody id="body"></tbody>
-    </table>
   </div>
 </div>
 
@@ -220,121 +242,14 @@
     window.__tt=setTimeout(()=>t.style.display="none",3200);
   }
 
-  function toInt(v){ const n=Number(v); return (Number.isFinite(n) && n>=0) ? Math.floor(n) : NaN; }
+  function toInt(v){
+    const n=Number(v);
+    return (Number.isFinite(n) && n>=0) ? Math.floor(n) : NaN;
+  }
 
   let lastActivated = [];      // 今回分明細
   let lastShipmentNo = "";     // 今回出荷番号
   let lastVenueName = "";
   let lastPlanned = "";
 
-  function activateByVenue(){
-    const venue = el("Venue").value;
-    const planned = el("Planned").value;
-    if(!planned){ toast("有効化予定日（納品予定日）を入力してください"); return; }
-
-    const qa=toInt(el("QtyA").value), qb=toInt(el("QtyB").value), qc=toInt(el("QtyC").value), qd=toInt(el("QtyD").value);
-    if([qa,qb,qc,qd].some(x=>Number.isNaN(x))){ toast("販売数を正しく入力してください（0以上の整数）"); return; }
-    if(qa+qb+qc+qd===0){ toast("販売数がすべて0です"); return; }
-
-    // 在庫チェック（簡易）
-    const need={A:qa,B:qb,C:qc,D:qd};
-    for(const k of ["A","B","C","D"]){
-      const available = draftStock.filter(x=>x.status==="DRAFT" && x.courseKey===k).length;
-      if(need[k] > available){
-        toast("在庫が不足しています（モック）", `${COURSES[k]}：必要 ${need[k]} / 在庫 ${available}`);
-        return;
-      }
-    }
-
-    // 出荷番号（追加は「新しい出荷番号」で作る想定）
-    const shipNo = nextShipmentNo(planned);
-
-    // 自動選定→ACTIVE化（モック）
-    lastActivated = [
-      ...pickDraftFIFO("A", qa),
-      ...pickDraftFIFO("B", qb),
-      ...pickDraftFIFO("C", qc),
-      ...pickDraftFIFO("D", qd),
-    ].map(x=>({
-      ...x,
-      planned_activation_date: planned,
-      venue_name: venue,
-      shipment_no: shipNo,
-    }));
-
-    lastShipmentNo = shipNo;
-    lastVenueName = venue;
-    lastPlanned = planned;
-
-    // 表示
-    el("sumVenue").textContent = venue;
-    el("sumShipNo").textContent = shipNo;
-    el("sumPlanned").textContent = planned.replaceAll("-","/");
-    el("sumCount").textContent = String(lastActivated.length);
-
-    const body=el("body");
-    body.innerHTML="";
-    lastActivated.forEach(r=>{
-      const tr=document.createElement("tr");
-      tr.innerHTML=`
-        <td>${r.courseName}</td>
-        <td>${r.lot_no}</td>
-        <td class="mono">${r.serial_no}</td>
-        <td>${r.planned_activation_date.replaceAll("-","/")}</td>
-        <td class="mono">${r.code}</td>
-      `;
-      body.appendChild(tr);
-    });
-
-    el("dlBtn").disabled = false;
-    toast("出荷リストを作成しました（モック）", `出荷番号：${shipNo} / 件数：${lastActivated.length}`);
-  }
-
-  function downloadCsv(){
-    if(!lastActivated.length){ toast("ダウンロード対象がありません"); return; }
-
-    // ===== 先頭ヘッダー行（同梱書類として編集しやすい形） =====
-    const pre = [
-      ["式場", lastVenueName],
-      ["出荷番号", lastShipmentNo],
-      ["有効化予定日（納品予定日）", lastPlanned],
-      [], // 空行
-    ];
-
-    // ===== 明細（繰り返し行） =====
-    const headers=["コース名","ロット番号","シリアル番号","有効化予定日"];
-    const rows = lastActivated.map(r=>[r.courseName,r.lot_no,r.serial_no,r.planned_activation_date]);
-
-    const esc=(v)=>{const s=String(v??""); return /[,"\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s;};
-    const lines = [];
-
-    pre.forEach(r=>{
-      if(r.length===0) lines.push("");
-      else lines.push(r.map(esc).join(","));
-    });
-
-    lines.push(headers.map(esc).join(","));
-    rows.forEach(r=>lines.push(r.map(esc).join(",")));
-
-    const csv = lines.join("\r\n");
-    const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
-
-    const a=document.createElement("a");
-    a.href=URL.createObjectURL(blob);
-    a.download=`shipment_${lastShipmentNo}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    a.remove();
-    URL.revokeObjectURL(a.href);
-
-    toast("CSVをダウンロードしました（モック）", `出荷番号：${lastShipmentNo}`);
-  }
-
-  // 初期値：有効化予定日＝今日
-  (function init(){
-    const now=new Date();
-    el("Planned").value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
-  })();
-</script>
-</body>
-</html>
+  // ★ 変更点：ボタン押下で「下ペイン」を表示し、一覧
