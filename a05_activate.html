@@ -252,4 +252,127 @@
   let lastVenueName = "";
   let lastPlanned = "";
 
-  // ★ 変更点：ボタン押下で「下ペイン」を表示し、一覧
+  // ★ 変更点：ボタン押下で「下ペイン」を表示し、一覧を描画する
+  function activateByVenue(){
+    const venue = el("Venue").value;
+    const planned = el("Planned").value;
+    if(!planned){ toast("有効化予定日（納品予定日）を入力してください"); return; }
+
+    const qa=toInt(el("QtyA").value), qb=toInt(el("QtyB").value), qc=toInt(el("QtyC").value), qd=toInt(el("QtyD").value);
+    if([qa,qb,qc,qd].some(x=>Number.isNaN(x))){
+      toast("販売数を正しく入力してください（0以上の整数）"); return;
+    }
+    if(qa+qb+qc+qd===0){ toast("販売数がすべて0です"); return; }
+
+    // 在庫チェック（簡易）
+    const need={A:qa,B:qb,C:qc,D:qd};
+    for(const k of ["A","B","C","D"]){
+      const available = draftStock.filter(x=>x.status==="DRAFT" && x.courseKey===k).length;
+      if(need[k] > available){
+        toast("在庫が不足しています（モック）", `${COURSES[k]}：必要 ${need[k]} / 在庫 ${available}`);
+        return;
+      }
+    }
+
+    // 出荷番号（追加は「新しい出荷番号」で作る想定）
+    const shipNo = nextShipmentNo(planned);
+
+    // 自動選定→ACTIVE化（モック）
+    lastActivated = [
+      ...pickDraftFIFO("A", qa),
+      ...pickDraftFIFO("B", qb),
+      ...pickDraftFIFO("C", qc),
+      ...pickDraftFIFO("D", qd),
+    ].map(x=>({
+      ...x,
+      planned_activation_date: planned,
+      venue_name: venue,
+      shipment_no: shipNo,
+    }));
+
+    lastShipmentNo = shipNo;
+    lastVenueName = venue;
+    lastPlanned = planned;
+
+    // 下ペインのサマリー更新
+    el("sumVenue").textContent = venue;
+    el("sumShipNo").textContent = shipNo;
+    el("sumPlanned").textContent = planned.replaceAll("-","/");
+    el("sumCount").textContent = String(lastActivated.length);
+
+    // 下ペインの一覧描画
+    const body=el("body");
+    body.innerHTML="";
+    lastActivated.forEach(r=>{
+      const tr=document.createElement("tr");
+      tr.innerHTML=`
+        <td>${r.courseName}</td>
+        <td>${r.lot_no}</td>
+        <td class="mono">${r.serial_no}</td>
+        <td>${r.planned_activation_date.replaceAll("-","/")}</td>
+        <td class="mono">${r.code}</td>
+      `;
+      body.appendChild(tr);
+    });
+
+    // 下ペインを表示（ここが要望対応）
+    el("lowerPane").classList.remove("hidden");
+
+    // ダウンロードボタン活性（上・下どちらも同じ動作）
+    el("dlBtnTop").disabled = false;
+    el("dlBtnBottom").disabled = false;
+
+    // 画面が長い場合、下ペインへスクロール（UX改善）
+    el("lowerPane").scrollIntoView({behavior:"smooth", block:"start"});
+
+    toast("出荷リストを作成しました（モック）", `出荷番号：${shipNo} / 件数：${lastActivated.length}`);
+  }
+
+  function downloadCsv(){
+    if(!lastActivated.length){ toast("ダウンロード対象がありません"); return; }
+
+    // 先頭ヘッダー行（同梱書類として編集しやすい形）
+    const pre = [
+      ["式場", lastVenueName],
+      ["出荷番号", lastShipmentNo],
+      ["有効化予定日（納品予定日）", lastPlanned],
+      [], // 空行
+    ];
+
+    // 明細（繰り返し行）
+    const headers=["コース名","ロット番号","シリアル番号","有効化予定日"];
+    const rows = lastActivated.map(r=>[r.courseName,r.lot_no,r.serial_no,r.planned_activation_date]);
+
+    const esc=(v)=>{const s=String(v??""); return /[,"\n]/.test(s)?`"${s.replace(/"/g,'""')}"`:s;};
+    const lines = [];
+
+    pre.forEach(r=>{
+      if(r.length===0) lines.push("");
+      else lines.push(r.map(esc).join(","));
+    });
+
+    lines.push(headers.map(esc).join(","));
+    rows.forEach(r=>lines.push(r.map(esc).join(",")));
+
+    const csv = lines.join("\r\n");
+    const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+
+    const a=document.createElement("a");
+    a.href=URL.createObjectURL(blob);
+    a.download=`shipment_${lastShipmentNo}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(a.href);
+
+    toast("CSVをダウンロードしました（モック）", `出荷番号：${lastShipmentNo}`);
+  }
+
+  // 初期値：有効化予定日＝今日
+  (function init(){
+    const now=new Date();
+    el("Planned").value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,"0")}-${String(now.getDate()).padStart(2,"0")}`;
+  })();
+</script>
+</body>
+</html>
