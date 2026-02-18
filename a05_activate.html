@@ -41,11 +41,8 @@
     .mono{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace}
     .toast{position:fixed;right:18px;bottom:18px;width:min(460px,calc(100% - 36px));background:#111827;color:#fff;padding:12px 14px;border-radius:14px;box-shadow:0 10px 25px rgba(17,24,39,.25);display:none;font-size:13px;line-height:1.5;z-index:30}
     .toast .sub{color:rgba(255,255,255,.75);font-size:12px;margin-top:4px}
-
-    /* ▼ ここが「上ペイン／下ペイン」の見た目（カード2段） */
     .pane-stack{display:flex;flex-direction:column;gap:14px}
     .hidden{display:none!important}
-
     @media (max-width: 980px){
       .grid{grid-template-columns:1fr}
       table{display:block;overflow-x:auto}
@@ -67,8 +64,7 @@
   </div>
 
   <div class="pane-stack">
-
-    <!-- 上ペイン：入力・実行 -->
+    <!-- 上：入力 -->
     <div class="card">
       <div class="section-h">
         <h2>式場からの販売連絡</h2>
@@ -122,7 +118,7 @@
       </div>
     </div>
 
-    <!-- 下ペイン：結果表示（ボタン押下後に表示） -->
+    <!-- 下：結果（ボタン押下後に表示） -->
     <div class="card hidden" id="lowerPane">
       <div class="section-h">
         <h2>今回 有効化したギフトコード一覧（出荷リスト）</h2>
@@ -155,14 +151,13 @@
         <tbody id="body"></tbody>
       </table>
     </div>
-
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
 <script>
-  // ===== モック用：在庫（未有効DRAFT）をコース別に用意（複数ロット混在）=====
+  // ===== 在庫（未有効DRAFT）をコース別に用意（複数ロット混在）=====
   const COURSES = {
     A:"コースA（例：11,800円）",
     B:"コースB（例：5,800円）",
@@ -205,25 +200,21 @@
     return arr;
   }
 
-  // ===== 出荷番号採番：VS-YYYYMMDD-###（日次連番）=====
+  // 出荷番号：VS-YYYYMMDD-###（日次連番）
   const shipCounterByDay = {};
-  function nextShipmentNo(dateStr){ // dateStr: YYYY-MM-DD
+  function nextShipmentNo(dateStr){
     const key = (dateStr||"").replaceAll("-","");
     shipCounterByDay[key] = (shipCounterByDay[key] || 0) + 1;
     const seq = String(shipCounterByDay[key]).padStart(3,"0");
     return `VS-${key}-${seq}`;
   }
 
-  // ===== 先入れ先出し：lot_no asc → serial_no asc で先頭から取る =====
+  // FIFO：lot_no asc → serial_no asc
   function pickDraftFIFO(courseKey, qty){
     const picked=[];
     const candidates = draftStock
       .filter(x=>x.status==="DRAFT" && x.courseKey===courseKey)
-      .sort((a,b)=>{
-        const ka = `${a.lot_no}|${a.serial_no}`;
-        const kb = `${b.lot_no}|${b.serial_no}`;
-        return ka.localeCompare(kb);
-      });
+      .sort((a,b)=>`${a.lot_no}|${a.serial_no}`.localeCompare(`${b.lot_no}|${b.serial_no}`));
 
     for(const item of candidates){
       if(picked.length>=qty) break;
@@ -247,24 +238,21 @@
     return (Number.isFinite(n) && n>=0) ? Math.floor(n) : NaN;
   }
 
-  let lastActivated = [];      // 今回分明細
-  let lastShipmentNo = "";     // 今回出荷番号
+  let lastActivated = [];
+  let lastShipmentNo = "";
   let lastVenueName = "";
   let lastPlanned = "";
 
-  // ★ 変更点：ボタン押下で「下ペイン」を表示し、一覧を描画する
   function activateByVenue(){
     const venue = el("Venue").value;
     const planned = el("Planned").value;
     if(!planned){ toast("有効化予定日（納品予定日）を入力してください"); return; }
 
     const qa=toInt(el("QtyA").value), qb=toInt(el("QtyB").value), qc=toInt(el("QtyC").value), qd=toInt(el("QtyD").value);
-    if([qa,qb,qc,qd].some(x=>Number.isNaN(x))){
-      toast("販売数を正しく入力してください（0以上の整数）"); return;
-    }
+    if([qa,qb,qc,qd].some(x=>Number.isNaN(x))){ toast("販売数を正しく入力してください（0以上の整数）"); return; }
     if(qa+qb+qc+qd===0){ toast("販売数がすべて0です"); return; }
 
-    // 在庫チェック（簡易）
+    // 在庫チェック
     const need={A:qa,B:qb,C:qc,D:qd};
     for(const k of ["A","B","C","D"]){
       const available = draftStock.filter(x=>x.status==="DRAFT" && x.courseKey===k).length;
@@ -274,10 +262,8 @@
       }
     }
 
-    // 出荷番号（追加は「新しい出荷番号」で作る想定）
     const shipNo = nextShipmentNo(planned);
 
-    // 自動選定→ACTIVE化（モック）
     lastActivated = [
       ...pickDraftFIFO("A", qa),
       ...pickDraftFIFO("B", qb),
@@ -294,13 +280,11 @@
     lastVenueName = venue;
     lastPlanned = planned;
 
-    // 下ペインのサマリー更新
     el("sumVenue").textContent = venue;
     el("sumShipNo").textContent = shipNo;
     el("sumPlanned").textContent = planned.replaceAll("-","/");
     el("sumCount").textContent = String(lastActivated.length);
 
-    // 下ペインの一覧描画
     const body=el("body");
     body.innerHTML="";
     lastActivated.forEach(r=>{
@@ -315,31 +299,27 @@
       body.appendChild(tr);
     });
 
-    // 下ペインを表示（ここが要望対応）
+    // ★ 下ペイン表示（要望対応）
     el("lowerPane").classList.remove("hidden");
 
-    // ダウンロードボタン活性（上・下どちらも同じ動作）
+    // CSVボタン活性（上・下）
     el("dlBtnTop").disabled = false;
     el("dlBtnBottom").disabled = false;
 
-    // 画面が長い場合、下ペインへスクロール（UX改善）
     el("lowerPane").scrollIntoView({behavior:"smooth", block:"start"});
-
     toast("出荷リストを作成しました（モック）", `出荷番号：${shipNo} / 件数：${lastActivated.length}`);
   }
 
   function downloadCsv(){
     if(!lastActivated.length){ toast("ダウンロード対象がありません"); return; }
 
-    // 先頭ヘッダー行（同梱書類として編集しやすい形）
     const pre = [
       ["式場", lastVenueName],
       ["出荷番号", lastShipmentNo],
       ["有効化予定日（納品予定日）", lastPlanned],
-      [], // 空行
+      [],
     ];
 
-    // 明細（繰り返し行）
     const headers=["コース名","ロット番号","シリアル番号","有効化予定日"];
     const rows = lastActivated.map(r=>[r.courseName,r.lot_no,r.serial_no,r.planned_activation_date]);
 
