@@ -57,7 +57,7 @@
       <h1>ギフトコード管理｜式場別 有効化</h1>
       <div class="sub">
         式場から「コース別の販売数」と「有効化予定日（納品予定日）」の連絡を受けた後、未有効（DRAFT）在庫から<strong>先入れ先出し（古いロット優先）</strong>で自動選定して有効化します。<br/>
-        取消は行わず、追加が発生した場合は別の出荷番号として作成します。
+        取消は行わず、追加が発生した場合は別の発送番号として作成します。
       </div>
     </div>
     <div class="badge">業務設計確認用モック</div>
@@ -108,26 +108,26 @@
       </div>
 
       <div class="row" style="justify-content:flex-end;margin-top:10px;">
-        <button class="btn primary" type="button" onclick="activateByVenue()">有効化して出荷リストを作成</button>
+        <button class="btn primary" type="button" onclick="activateByVenue()">有効化して発送リストを作成</button>
         <button class="btn" id="dlBtnTop" type="button" onclick="downloadCsv()" disabled>データダウンロード（CSV）</button>
       </div>
 
       <div class="note">
         <b>CSV（同梱書類への編集を想定）</b><br/>
-        先頭行に「式場」「出荷番号」「有効化予定日」を付加し、その下に明細（繰り返し行）を出力します。
+        先頭行に「式場」「発送番号」「有効化予定日」を付加し、その下に明細（繰り返し行）を出力します。
       </div>
     </div>
 
     <!-- 下：結果（ボタン押下後に表示） -->
     <div class="card hidden" id="lowerPane">
       <div class="section-h">
-        <h2>今回 有効化したギフトコード一覧（出荷リスト）</h2>
+        <h2>今回 有効化したギフトコード一覧（発送リスト）</h2>
         <span class="badge">自動選定結果</span>
       </div>
 
       <div class="pillbar">
         <div class="pill">式場：<b id="sumVenue">—</b></div>
-        <div class="pill">出荷番号：<b id="sumShipNo">—</b></div>
+        <div class="pill">発送番号：<b id="sumShipNo">—</b></div>
         <div class="pill">有効化予定日：<b id="sumPlanned">—</b></div>
         <div class="pill">件数：<b id="sumCount">—</b></div>
       </div>
@@ -138,7 +138,7 @@
 
       <div style="height:10px"></div>
 
-      <table aria-label="出荷リスト">
+      <table aria-label="発送リスト">
         <thead>
           <tr>
             <th>コース名</th>
@@ -224,7 +224,7 @@
     ...makeStock("202602-01","D",10),
   ];
 
-  // ===== 出荷番号採番：VS-YYYYMMDD-###（日次連番）=====
+  // ===== 発送番号採番：VS-YYYYMMDD-###（日次連番）=====
   const shipCounterByDay = {};
   function nextShipmentNo(dateStr){
     const key = (dateStr || "").replaceAll("-","");
@@ -248,7 +248,7 @@
     return picked;
   }
 
-  // ===== 状態（今回作成した出荷リスト）=====
+  // ===== 状態（今回作成した発送リスト）=====
   let lastActivated = [];
   let lastShipmentNo = "";
   let lastVenueName = "";
@@ -276,7 +276,7 @@
       }
     }
 
-    // 出荷番号
+    // 発送番号
     const shipNo = nextShipmentNo(planned);
 
     // 自動選定 → ACTIVE化
@@ -332,7 +332,7 @@
     if(el("dlBtnTop")) el("dlBtnTop").disabled = false;
     if(el("dlBtnBottom")) el("dlBtnBottom").disabled = false;
 
-    toast("出荷リストを作成しました（モック）", `出荷番号：${shipNo} / 件数：${lastActivated.length}`);
+    toast("発送リストを作成しました（モック）", `発送番号：${shipNo} / 件数：${lastActivated.length}`);
   }
 
   // CSV出力（必要なら）
@@ -341,7 +341,7 @@
 
     const pre = [
       ["式場", lastVenueName],
-      ["出荷番号", lastShipmentNo],
+      ["発送番号", lastShipmentNo],
       ["有効化予定日（納品予定日）", lastPlanned],
       [],
     ];
@@ -364,7 +364,7 @@
     a.remove();
     URL.revokeObjectURL(a.href);
 
-    toast("CSVをダウンロードしました（モック）", `出荷番号：${lastShipmentNo}`);
+    toast("CSVをダウンロードしました（モック）", `発送番号：${lastShipmentNo}`);
   }
 
   // 初期値：日付=今日（存在する場合のみ）
