@@ -346,14 +346,13 @@
   function hideModal(){ el("mbg").style.display="none"; }
   function closeModal(){ hideModal(); }
 
-  // 初期値（検索条件だけ入れておく）：下ペインは出さない
-  (function init(){
-    const today=new Date();
-    const pad=(n)=>String(n).padStart(2,"0");
-    const y=today.getFullYear(), m=today.getMonth()+1, d=today.getDate();
-    el("fFrom").value = `${y}-${pad(m)}-${pad(Math.max(1,d-30))}`;
-    el("fTo").value = `${y}-${pad(m)}-${pad(d)}`;
-  })();
+  // 初期値（検索条件だけ入れておく）
+(function init(){
+  // ダミーデータ（2026年2〜3月）にヒットする初期条件
+  el("fFrom").value = "2026-02-01";
+  el("fTo").value   = "2026-03-31";
+})();
+
 </script>
 </body>
 </html>
