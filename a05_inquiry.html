@@ -308,6 +308,20 @@
   }
 
   setEmpty();
+
+  // 初期表示で、ダミーデータにヒットする検索条件を入れておく
+  (function initInquiryDefault(){
+    const search = document.getElementById("Search");
+    if(!search) return;
+
+    // USEDの例が出るので、クライアントが「注文情報リンクが必要」の文脈も理解しやすい
+    search.value = "202604-01-0003"; // ←シリアル番号（確実にヒット）
+    // search.value = "T6WB-XR9H-K4QP-8ZMF"; // ←ギフトコードでヒットさせたいならこちら
+
+    // 任意：初期状態で結果まで出したい場合は、次の行を有効化
+    // if(typeof doSearch === "function") doSearch();
+  })();
+
 </script>
 </body>
 </html>
