@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>ギフトコード管理｜式場出荷（一覧／履歴）</title>
+  <title>ギフトコード管理｜式場発送（一覧／履歴）</title>
   <style>
     :root{--bg:#f6f7fb;--card:#fff;--text:#111827;--muted:#6b7280;--line:#e5e7eb;--p:#2563eb;--p2:#1d4ed8;--shadow:0 10px 25px rgba(17,24,39,.08);--r:16px;
       --font:ui-sans-serif,system-ui,-apple-system,"Segoe UI","Hiragino Kaku Gothic ProN","Noto Sans JP","Meiryo",Arial,sans-serif;}
@@ -54,10 +54,10 @@
 <div class="wrap">
   <div class="title">
     <div>
-      <h1>ギフトコード管理｜式場出荷（一覧／履歴）</h1>
+      <h1>ギフトコード管理｜式場発送（一覧／履歴）</h1>
       <div class="sub">
-        出荷番号単位で、いつ・どの式場へ・何枚を有効化し、どのギフトコードを渡したかを確認します。<br/>
-        取消は行わず、追加が発生した場合は別の出荷番号として記録されます。
+        発送番号単位で、いつ・どの式場へ・何枚を有効化し、どのギフトコードを渡したかを確認します。<br/>
+        取消は行わず、追加が発生した場合は別の発送番号として記録されます。
       </div>
     </div>
     <div class="badge">業務設計確認用モック</div>
@@ -96,25 +96,25 @@
       <div class="divider"></div>
 
       <div class="muted" style="font-size:12px;line-height:1.7">
-        ※ 検索ボタンを押すと、下に出荷一覧を表示します（初期表示は非表示）。
+        ※ 検索ボタンを押すと、下に発送一覧を表示します（初期表示は非表示）。
       </div>
     </div>
 
     <!-- 下ペイン：検索結果（検索後に表示） -->
     <div class="card" id="lowerPane">
       <div class="section-h">
-        <h2>出荷一覧（検索結果）</h2>
-        <span class="badge">1行＝1出荷番号</span>
+        <h2>発送一覧（検索結果）</h2>
+        <span class="badge">1行＝1発送番号</span>
       </div>
 
       <div class="muted" style="font-size:12px;margin-bottom:10px">
         件数：<b id="resultCount">—</b>
       </div>
 
-      <table aria-label="式場出荷一覧">
+      <table aria-label="式場発送一覧">
         <thead>
           <tr>
-            <th>出荷番号</th>
+            <th>発送番号</th>
             <th>式場</th>
             <th>納品予定日</th>
             <th>枚数（コース別）</th>
@@ -128,7 +128,7 @@
       <div class="divider"></div>
 
       <div class="muted" style="font-size:12px;line-height:1.7">
-        ※「CSV再ダウンロード」は、先頭行に「式場」「出荷番号」「納品予定日」を付加した形式で出力します。
+        ※「CSV再ダウンロード」は、先頭行に「式場」「発送番号」「納品予定日」を付加した形式で出力します。
       </div>
     </div>
 
@@ -140,7 +140,7 @@
   <div class="modal" onclick="event.stopPropagation()">
     <div class="modal-h">
       <div>
-        <b id="mTitle">出荷詳細</b>
+        <b id="mTitle">発送詳細</b>
         <div class="muted" style="font-size:12px;margin-top:4px" id="mSub">—</div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap">
@@ -149,7 +149,7 @@
       </div>
     </div>
     <div class="modal-b">
-      <table aria-label="出荷明細（ギフトコード一覧）">
+      <table aria-label="発送明細（ギフトコード一覧）">
         <thead>
           <tr>
             <th>コース名</th>
@@ -284,14 +284,14 @@
     toast("検索結果を表示しました", `件数：${list.length}`);
   }
 
-  // ===== CSV（先頭行に式場/出荷番号/納品予定日）=====
+  // ===== CSV（先頭行に式場/発送番号/納品予定日）=====
   function downloadShipmentCsv(id){
     const s = SHIPMENTS.find(x=>x.id===id);
     if(!s){ toast("対象が見つかりません"); return; }
 
     const pre = [
       ["式場", s.venue_name],
-      ["出荷番号", s.shipment_no],
+      ["発送番号", s.shipment_no],
       ["有効化予定日（納品予定日）", s.planned_activation_date],
       [],
     ];
@@ -314,7 +314,7 @@
     a.remove();
     URL.revokeObjectURL(a.href);
 
-    toast("CSVをダウンロードしました（モック）", `出荷番号：${s.shipment_no}`);
+    toast("CSVをダウンロードしました（モック）", `発送番号：${s.shipment_no}`);
   }
 
   // ===== 詳細モーダル =====
@@ -324,7 +324,7 @@
     if(!s){ toast("対象が見つかりません"); return; }
 
     activeShipmentId = id;
-    el("mTitle").textContent = `出荷詳細：${s.shipment_no}`;
+    el("mTitle").textContent = `発送詳細：${s.shipment_no}`;
     el("mSub").textContent = `式場：${s.venue_name} / 納品予定日：${s.planned_activation_date.replaceAll("-","/")} / 明細：${(s.details||[]).length}件`;
 
     const mb=el("mBody");
