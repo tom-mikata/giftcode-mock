@@ -193,71 +193,68 @@
     return null;
   }
 
-  function setEmpty(){
-    currentHit=null;
-    el("resLot").textContent="—";
-    el("resSerial").textContent="—";
-    el("resCourse").textContent="—";
-    el("resStatus").innerHTML="—";
-    el("resSold").textContent="—";
-    el("resExp").textContent="—";
-    el("resCode").textContent="—";
+function setEmpty(){
+  currentHit = null;
+  el("resSerial").textContent = "—";
+  el("resCourse").textContent = "—";
+  el("resStatus").innerHTML = "—";
+  el("resSold").textContent = "—";
+  el("resExp").textContent = "—";
+  el("resCode").textContent = "—";
 
-    // A-08リンク関連
-    el("orderSummary").style.display="none";
-    el("openA08Btn").style.display="none";
-    el("openA08Btn").href="#";
-    el("noOrderHint").style.display="block";
-    el("resOrderNo").textContent="—";
-    el("resOrderedAt").textContent="—";
+  // 注文詳細リンク関連
+  el("orderSummary").style.display = "none";
+  el("openA08Btn").style.display = "none";
+  el("openA08Btn").href = "#";
+  el("noOrderHint").style.display = "block";
+  el("resOrderNo").textContent = "—";
+  el("resOrderedAt").textContent = "—";
 
-    // セッション破棄
-    el("discardBtn").disabled=true;
+  // セッション破棄
+  el("discardBtn").disabled = true;
+}
+
+function doSearch(){
+  const q = el("Search").value;
+  const hit = find(q, null); // ロット絞り込みなし
+
+  if(!hit){
+    setEmpty();
+    toast("見つかりませんでした", "シリアル番号 / ギフトコードを確認してください");
+    return;
   }
 
-  function doSearch(){
-    const q=el("Search").value;
-    const lotFilter=el("LotSelect").value || null;
-    const hit=find(q, lotFilter);
+  currentHit = hit;
+  el("resSerial").textContent = hit.item.serial_no;
+  el("resCourse").textContent = hit.course;
+  el("resStatus").innerHTML = statusChip(hit.item.status);
+  el("resSold").textContent = isoToJp(hit.item.sold_on);
+  el("resExp").textContent = isoToJp(hit.item.expires_on);
+  el("resCode").textContent = hit.item.code;
 
-    if(!hit){
-      setEmpty();
-      toast("見つかりませんでした", "シリアル番号 / ギフトコードを確認してください");
-      return;
-    }
+  // USED のときだけ注文詳細リンクを表示
+  if(hit.item.status === "USED" && hit.item.order_id){
+    el("noOrderHint").style.display = "none";
 
-    currentHit=hit;
-    el("resLot").textContent=hit.lotNo;
-    el("resSerial").textContent=hit.item.serial_no;
-    el("resCourse").textContent=hit.course;
-    el("resStatus").innerHTML=statusChip(hit.item.status);
-    el("resSold").textContent=isoToJp(hit.item.sold_on);
-    el("resExp").textContent=isoToJp(hit.item.expires_on);
-    el("resCode").textContent=hit.item.code;
+    el("orderSummary").style.display = "block";
+    el("resOrderNo").textContent = hit.item.order_no || "—";
+    el("resOrderedAt").textContent = hit.item.ordered_at || "—";
 
-    // USED のときだけ A-08 リンクを表示
-    if(hit.item.status==="USED" && hit.item.order_id){
-      el("noOrderHint").style.display="none";
-
-      el("orderSummary").style.display="block";
-      el("resOrderNo").textContent = hit.item.order_no || "—";
-      el("resOrderedAt").textContent = hit.item.ordered_at || "—";
-
-      const a08 = el("openA08Btn");
-      a08.href = buildA08Url(hit.item.order_id);
-      a08.style.display = "inline-flex";
-    }else{
-      el("orderSummary").style.display="none";
-      el("openA08Btn").style.display="none";
-      el("openA08Btn").href="#";
-      el("noOrderHint").style.display="block";
-    }
-
-    // 例：セッション破棄は「有効」だけ押せる（モック）
-    el("discardBtn").disabled = (hit.item.status!=="ACTIVE");
-
-    toast("検索結果を表示しました", `ロット番号：${hit.lotNo}`);
+    const a08 = el("openA08Btn");
+    a08.href = buildA08Url(hit.item.order_id);
+    a08.style.display = "inline-flex";
+  }else{
+    el("orderSummary").style.display = "none";
+    el("openA08Btn").style.display = "none";
+    el("openA08Btn").href = "#";
+    el("noOrderHint").style.display = "block";
   }
+
+  // セッション破棄は「有効」だけ押せる
+  el("discardBtn").disabled = (hit.item.status !== "ACTIVE");
+
+  toast("検索結果を表示しました", `シリアル番号：${hit.item.serial_no}`);
+}
 
   async function copyCode(){
     if(!currentHit) return;
