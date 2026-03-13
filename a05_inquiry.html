@@ -58,27 +58,6 @@
     <div class="badge">業務画面モック</div>
   </div>
 
-  <div class="card">
-    <div class="section-h">
-      <h2>ロット（任意）</h2>
-      <span class="badge">検索が主導線</span>
-    </div>
-
-    <div class="row">
-      <div class="controls" style="flex:1;">
-        <div class="field">
-          <label for="LotSelect">ロット番号（絞り込みたい場合）</label>
-          <select id="LotSelect">
-            <option value="">（指定しない）</option>
-            <option value="202604-01">202604-01（税込 11,800円コース）</option>
-            <option value="202603-02">202603-02（税込 5,800円コース）</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <div class="divider"></div>
-
     <div class="section-h">
       <h2>検索</h2>
       <span class="badge">シリアル番号 / ギフトコード</span>
@@ -100,7 +79,6 @@
     </div>
 
     <div class="pillbar">
-      <div class="pill">ロット：<b id="resLot">—</b></div>
       <div class="pill">シリアル番号：<b id="resSerial">—</b></div>
       <div class="pill">コース：<b id="resCourse">—</b></div>
     </div>
@@ -109,7 +87,7 @@
 
     <div class="kv">
       <div class="k">状態</div><div class="v" id="resStatus">—</div>
-      <div class="k">販売日</div><div class="v" id="resSold">—</div>
+      <div class="k">有効開始日</div><div class="v" id="resSold">—</div>
       <div class="k">有効期限</div><div class="v" id="resExp">—</div>
       <div class="k">ギフトコード</div>
       <div class="v">
@@ -170,15 +148,15 @@
   const db={
     "202604-01":{course:"税込 11,800円コース",items:[
       {serial_no:"202604-01-0001",code:"7KQZ-HM3R-X9TP-B4WC",status:"DRAFT",sold_on:"",expires_on:""},
-      {serial_no:"202604-01-0002",code:"N8YD-R2KF-Q7LM-3VZP",status:"ACTIVE",sold_on:"2026-02-08",expires_on:"2027-02-08"},
-      {serial_no:"202604-01-0003",code:"T6WB-XR9H-K4QP-8ZMF",status:"USED",sold_on:"2026-02-01",expires_on:"2027-02-01",
+      {serial_no:"202604-01-0002",code:"N8YD-R2KF-Q7LM-3VZP",status:"ACTIVE",sold_on:"2026-02-08",expires_on:"2026-08-08"},
+      {serial_no:"202604-01-0003",code:"T6WB-XR9H-K4QP-8ZMF",status:"USED",sold_on:"2026-02-01",expires_on:"2026-08-01",
         order_id:"ord_20260201_000123", order_no:"20260201-000123", ordered_at:"2026-02-11 14:32",
         product_summary:"Aコース：商品A（例）"
       },
     ]},
     "202603-02":{course:"税込 5,800円コース",items:[
-      {serial_no:"202603-02-0001",code:"K4QP-8ZMF-7KQZ-HM3R",status:"ACTIVE",sold_on:"2026-01-20",expires_on:"2027-01-20"},
-      {serial_no:"202603-02-0002",code:"Z3VP-7K2R-W8ND-H5D9",status:"EXPIRED",sold_on:"2024-12-01",expires_on:"2025-12-01"},
+      {serial_no:"202603-02-0001",code:"K4QP-8ZMF-7KQZ-HM3R",status:"ACTIVE",sold_on:"2026-01-20",expires_on:"2026-07-20"},
+      {serial_no:"202603-02-0002",code:"Z3VP-7K2R-W8ND-H5D9",status:"EXPIRED",sold_on:"2024-12-01",expires_on:"2024-06-01"},
     ]}
   };
 
