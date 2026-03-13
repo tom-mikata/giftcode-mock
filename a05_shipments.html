@@ -69,7 +69,7 @@
     <div class="card">
       <div class="section-h">
         <h2>検索</h2>
-        <span class="badge">式場 / 納品予定日</span>
+        <span class="badge">式場 / 有効開始日</span>
       </div>
 
       <div class="row">
@@ -83,11 +83,11 @@
           </select>
         </div>
         <div class="field">
-          <label for="fFrom">納品予定日（開始）</label>
+          <label for="fFrom">有効開始日（開始）</label>
           <input id="fFrom" type="date" />
         </div>
         <div class="field">
-          <label for="fTo">納品予定日（終了）</label>
+          <label for="fTo">有効開始日（終了）</label>
           <input id="fTo" type="date" />
         </div>
         <button class="btn primary" type="button" onclick="applyFilter()">検索</button>
@@ -116,7 +116,7 @@
           <tr>
             <th>発送番号</th>
             <th>式場</th>
-            <th>納品予定日</th>
+            <th>有効開始日</th>
             <th>枚数（コース別）</th>
             <th>作成日時</th>
             <th>操作</th>
@@ -128,7 +128,7 @@
       <div class="divider"></div>
 
       <div class="muted" style="font-size:12px;line-height:1.7">
-        ※「CSV再ダウンロード」は、先頭行に「式場」「発送番号」「納品予定日」を付加した形式で出力します。
+        ※「CSV再ダウンロード」は、先頭行に「式場」「発送番号」「有効開始日」を付加した形式で出力します。
       </div>
     </div>
 
@@ -155,7 +155,7 @@
             <th>コース名</th>
             <th>ロット番号</th>
             <th>シリアル番号</th>
-            <th>納品予定日</th>
+            <th>有効開始日</th>
             <th>ギフトコード（参考）</th>
           </tr>
         </thead>
@@ -284,7 +284,7 @@
     toast("検索結果を表示しました", `件数：${list.length}`);
   }
 
-  // ===== CSV（先頭行に式場/発送番号/納品予定日）=====
+  // ===== CSV（先頭行に式場/発送番号/有効開始日）=====
   function downloadShipmentCsv(id){
     const s = SHIPMENTS.find(x=>x.id===id);
     if(!s){ toast("対象が見つかりません"); return; }
@@ -292,7 +292,7 @@
     const pre = [
       ["式場", s.venue_name],
       ["発送番号", s.shipment_no],
-      ["有効化予定日（納品予定日）", s.planned_activation_date],
+      ["有効化予定日（有効開始日）", s.planned_activation_date],
       [],
     ];
     const headers=["コース名","ロット番号","シリアル番号","有効化予定日"];
@@ -325,7 +325,7 @@
 
     activeShipmentId = id;
     el("mTitle").textContent = `発送詳細：${s.shipment_no}`;
-    el("mSub").textContent = `式場：${s.venue_name} / 納品予定日：${s.planned_activation_date.replaceAll("-","/")} / 明細：${(s.details||[]).length}件`;
+    el("mSub").textContent = `式場：${s.venue_name} / 有効開始日：${s.planned_activation_date.replaceAll("-","/")} / 明細：${(s.details||[]).length}件`;
 
     const mb=el("mBody");
     mb.innerHTML="";
